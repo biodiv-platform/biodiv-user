@@ -216,6 +216,8 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.SPECIES_PARTICIPATION_OBSERVATION;
 		else if (objectType.equalsIgnoreCase(Constants.DOCUMENT))
 			objectType = Constants.CONTENT_EML_DOCUMENT;
+		else if (objectType.equalsIgnoreCase(Constants.SPECIES))
+			objectType = Constants.SPECIES_SPECIES;
 		Follow follow = followDao.findByObject(objectType, objectId, authorId);
 		return follow;
 	}
@@ -232,6 +234,8 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.SPECIES_PARTICIPATION_OBSERVATION;
 		else if (objectType.equalsIgnoreCase(Constants.DOCUMENT))
 			objectType = Constants.CONTENT_EML_DOCUMENT;
+		else if (objectType.equalsIgnoreCase(Constants.SPECIES))
+			objectType = Constants.SPECIES_SPECIES;
 		Follow follow = followDao.findByObject(objectType, objectId, userId);
 		if (follow == null) {
 			follow = new Follow(null, 0L, objectId, objectType, userId, new Date());
@@ -247,6 +251,8 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.SPECIES_PARTICIPATION_OBSERVATION;
 		else if (objectType.equalsIgnoreCase(Constants.DOCUMENT))
 			objectType = Constants.CONTENT_EML_DOCUMENT;
+		else if (objectType.equalsIgnoreCase(Constants.SPECIES))
+			objectType = Constants.SPECIES_SPECIES;
 		Follow follow = followDao.findByObject(objectType, objectId, userId);
 		if (follow != null) {
 			follow = followDao.delete(follow);
