@@ -86,7 +86,8 @@ public class UserServiceImpl implements UserService {
 		return inputUserId;
 	}
 
-	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic) throws UnAuthorizedUserException {
+	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic)
+			throws UnAuthorizedUserException {
 		userId = validateUserForEdits(request, userId);
 		User user = userDao.findById(userId);
 
@@ -138,7 +139,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser) throws UnAuthorizedUserException {
+	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser)
+			throws UnAuthorizedUserException {
 
 		Long inputUserId = validateUserForEdits(request, inputUser.getId());
 		User user = userDao.findById(inputUserId);
@@ -307,6 +309,16 @@ public class UserServiceImpl implements UserService {
 			logger.error(ex.getMessage());
 		}
 		return null;
+	}
+
+	@Override
+	public List<User> getAllAdmins() {
+		List<Long> adminIdList = userDao.findRoleAdmin();
+		List<User> result = new ArrayList<User>();
+		for(Long adminId:adminIdList) {
+			result.add(fetchUser(adminId));
+		}
+		return result;
 	}
 
 }

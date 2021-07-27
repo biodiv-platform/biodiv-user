@@ -15,6 +15,7 @@ import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.hibernate.type.LongType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +124,23 @@ public class UserDao extends AbstractDAO<User, Long> {
 			session.close();
 		}
 		return entity;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Long> findRoleAdmin() {
+		Session session = sessionFactory.openSession();
+		String qry = "SELECT s_user_id	FROM public.suser_role sr join role r on sr.role_id = r.id where r.authority = 'ROLE_ADMIN'";
+		List<Long> result = null;
+		try {
+			Query<Long> query = session.createNativeQuery(qry).addScalar("s_user_id", LongType.INSTANCE);
+			result = query.getResultList();
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		} finally {
+			session.close();
+		}
+		return result;
 	}
 
 }

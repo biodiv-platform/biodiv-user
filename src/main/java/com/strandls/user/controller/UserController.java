@@ -62,7 +62,7 @@ import net.minidev.json.JSONArray;
 @Api("User Service")
 @Path(ApiConstants.V1 + ApiConstants.USER)
 public class UserController {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 	@Inject
@@ -125,7 +125,8 @@ public class UserController {
 	@ApiOperation(value = "update the user", notes = "Returns User details", response = User.class)
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
 	@ValidateUser
-	public Response updateUserImage(@Context HttpServletRequest request, @QueryParam("id") Long userId, @QueryParam("profilePic") String profilePic) throws UnAuthorizedUserException {
+	public Response updateUserImage(@Context HttpServletRequest request, @QueryParam("id") Long userId,
+			@QueryParam("profilePic") String profilePic) throws UnAuthorizedUserException {
 		User user = userService.updateProfilePic(request, userId, profilePic);
 		return Response.status(Status.OK).entity(user).build();
 	}
@@ -165,7 +166,7 @@ public class UserController {
 	@ValidateUser
 	public Response updateUserRoles(@Context HttpServletRequest request, @ApiParam(name = "user") UserRoles inputUser)
 			throws UnAuthorizedUserException {
-		if(AuthUtility.isAdmin(request)) {
+		if (AuthUtility.isAdmin(request)) {
 			Response.status(Status.UNAUTHORIZED).build();
 		}
 		User user = userService.updateRolesAndPermission(request, inputUser);
@@ -397,9 +398,7 @@ public class UserController {
 	@Path(ApiConstants.DELETE + "/{userId}")
 	@ValidateUser
 	@ApiOperation(value = "Delete an existing user", notes = "Gets the user id and deletes the user", response = String.class)
-	@ApiImplicitParams({
-		@ApiImplicitParam(name = "authorization", paramType = "header")
-	})
+	@ApiImplicitParams({ @ApiImplicitParam(name = "authorization", paramType = "header") })
 	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to delete the user", response = String.class) })
 
 	public Response deleteUser(@Context HttpServletRequest request, @PathParam("userId") String userId) {
@@ -419,6 +418,22 @@ public class UserController {
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
 			return Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();
+		}
+	}
+
+	@GET
+	@Path(ApiConstants.ADMIN)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ApiOperation(value = "Fetch all the admins of the portal", notes = "Returns a list of admins", response = User.class, responseContainer = "List")
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the admins", response = String.class) })
+
+	public Response getAllAdmins() {
+		try {
+			List<User> result = userService.getAllAdmins();
+			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
