@@ -67,5 +67,11 @@ public class ApiConstants {
 
 	public static final String DELETE = "/delete";
 	public static final String ADMIN = "/admin";
+	
+	public static final String DOWNLOADLOG = "/download-log";
+	public static final String LIST = "/list";
+
+	
+	
 
 }
