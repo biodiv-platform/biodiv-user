@@ -1,19 +1,25 @@
 package com.strandls.user.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
+import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.strandls.authentication_utility.util.AuthUtil;
+import com.strandls.user.pojo.DownloadLog;
 import com.strandls.user.dao.DownloadLogDao;
+import com.strandls.user.pojo.DownloadLogData;
 import com.strandls.user.pojo.DownloadLogListMapping;
 import com.strandls.user.pojo.DownloadLogMapping;
 import com.strandls.user.service.DowloadLogService;
@@ -55,6 +61,21 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 			logger.error(e.getMessage());
 		}
 		return result;
+	}
+
+	@Override
+	public Boolean createDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData) {
+		CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+		Long authorId = Long.parseLong(profile.getId());
+
+		DownloadLog downloadLog = new DownloadLog(null, 0L, authorId, new Date(), downloadLogData.getFilePath(),
+				downloadLogData.getFilterUrl(), null, null, downloadLogData.getStatus().toLowerCase(),
+				downloadLogData.getFileType().toUpperCase(), downloadLogData.getSourcetype(), 0L);
+
+		downloadLog = downloadLogDao.save(downloadLog);
+		if (downloadLog.getId() != null)
+			return true;
+		return false;
 	}
 
 }

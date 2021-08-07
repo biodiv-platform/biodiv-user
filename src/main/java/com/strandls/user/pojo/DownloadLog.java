@@ -1,7 +1,6 @@
 package com.strandls.user.pojo;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -32,7 +31,7 @@ public class DownloadLog implements Serializable {
 	private Long authorId;
 
 	@Column(name = "created_on", nullable = false)
-	private Timestamp createdOn;
+	private Date createdOn;
 
 	@Column(name = "file_path")
 	private String filePath;
@@ -58,7 +57,7 @@ public class DownloadLog implements Serializable {
 	@Column(name = "offset_param", nullable = false)
 	private Long offsetParam;
 
-	public DownloadLog(Long id, Long version, Long authorId, Timestamp createdOn, String filePath, String filterUrl,
+	public DownloadLog(Long id, Long version, Long authorId, Date createdOn, String filePath, String filterUrl,
 			String notes, String paramsMapAsText, String status, String type, String sourceType, Long offsetParam) {
 		super();
 		this.id = id;
@@ -107,7 +106,7 @@ public class DownloadLog implements Serializable {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Timestamp createdOn) {
+	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
 	}
 
