@@ -45,7 +45,7 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 	public List<DownloadLog> getDownloadLogList(String orderBy, Integer limit, Integer offset) {
 		Session session = sessionFactory.openSession();
 		List<DownloadLog> downloadLogList = new ArrayList<DownloadLog>();
-		String hql = "from DownloadLog order by :orderBy desc";
+		String hql = "from DownloadLog where  status != 'Failed' order by :orderBy desc";
 		try {
 			Query query = session.createQuery(hql);
 			query.setParameter("orderBy", orderBy);
@@ -65,7 +65,7 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 	@SuppressWarnings("unchecked")
 	public Long getDownloadLogTotal() {
 		Session session = sessionFactory.openSession();
-		String qry = "select count(id) from download_log";
+		String qry = "select count(id) from download_log where  status != 'Failed'";
 
 		Long total = null;
 		try {
