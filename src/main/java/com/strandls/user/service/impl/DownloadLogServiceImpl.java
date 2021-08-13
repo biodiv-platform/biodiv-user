@@ -13,7 +13,6 @@ import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.strandls.authentication_utility.util.AuthUtil;
@@ -22,6 +21,7 @@ import com.strandls.user.dao.DownloadLogDao;
 import com.strandls.user.pojo.DownloadLogData;
 import com.strandls.user.pojo.DownloadLogListMapping;
 import com.strandls.user.pojo.DownloadLogMapping;
+import com.strandls.user.pojo.UserIbp;
 import com.strandls.user.service.DowloadLogService;
 
 public class DownloadLogServiceImpl implements DowloadLogService {
@@ -29,6 +29,9 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 
 	@Inject
 	private DownloadLogDao downloadLogDao;
+
+	@Inject
+	private UserServiceImpl userService;
 
 	@Inject
 	private ObjectMapper om;
@@ -42,16 +45,17 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 			downloadLogDao.getDownloadLogList(orderBy, offset, limit).forEach(item -> {
 				Map<String, Object> params = new HashMap<String, Object>();
 				try {
+					UserIbp user = userService.fetchUserIbp(item.getAuthorId());
 					params = item.getParamsMapAsText() != null
 							? om.readValue(item.getParamsMapAsText(), new TypeReference<Map<String, Object>>() {
 							})
 							: null;
 
-					DownloadLogMapping logMapping = new DownloadLogMapping(item.getId(), item.getAuthorId(),
-							item.getCreatedOn(), item.getStatus(), item.getType(), item.getSourceType(),
-							item.getNotes(), item.getFilterUrl(), params);
+					DownloadLogMapping logMapping = new DownloadLogMapping(item.getId(), user, item.getCreatedOn(),
+							item.getStatus(), item.getType(), item.getSourceType(), item.getNotes(),
+							item.getFilterUrl(), item.getFilePath(), params);
 					downLoadLogList.add(logMapping);
-				} catch (JsonProcessingException e) {
+				} catch (Exception e) {
 					logger.error(e.getMessage());
 				}
 			});

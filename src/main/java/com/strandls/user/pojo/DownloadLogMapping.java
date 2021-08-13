@@ -6,26 +6,28 @@ import java.util.Map;
 public class DownloadLogMapping {
 
 	private Long id;
-	private Long authorId;
+	private UserIbp user;
 	private Date createdOn;
 	private String status;
 	private String type;
 	private String sourceType;
 	private String notes;
 	private String filterUrl;
+	private String filePath;
 	private Map<String, Object> params;
 
-	public DownloadLogMapping(Long id, Long authorId, Date createdOn, String status, String type, String sourceType,
-			String notes, String filterUrl, Map<String, Object> params) {
+	public DownloadLogMapping(Long id, UserIbp user, Date createdOn, String status, String type, String sourceType,
+			String notes, String filterUrl, String filePath, Map<String, Object> params) {
 		super();
 		this.id = id;
-		this.authorId = authorId;
+		this.user = user;
 		this.createdOn = createdOn;
 		this.status = status;
 		this.type = type;
 		this.sourceType = sourceType;
 		this.notes = notes;
 		this.filterUrl = filterUrl;
+		this.filePath = filePath;
 		this.params = params;
 	}
 
@@ -42,12 +44,12 @@ public class DownloadLogMapping {
 		this.id = id;
 	}
 
-	public Long getAuthorId() {
-		return authorId;
+	public UserIbp getUser() {
+		return user;
 	}
 
-	public void setAuthorId(Long authorId) {
-		this.authorId = authorId;
+	public void setUser(UserIbp user) {
+		this.user = user;
 	}
 
 	public Date getCreatedOn() {
@@ -96,6 +98,14 @@ public class DownloadLogMapping {
 
 	public void setFilterUrl(String filterUrl) {
 		this.filterUrl = filterUrl;
+	}
+
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
 	}
 
 	public Map<String, Object> getParams() {
