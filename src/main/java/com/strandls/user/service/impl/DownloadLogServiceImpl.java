@@ -51,9 +51,9 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 							})
 							: null;
 
-					DownloadLogMapping logMapping = new DownloadLogMapping(item.getId(), user, item.getCreatedOn(),
-							item.getStatus(), item.getType(), item.getSourceType(), item.getNotes(),
-							item.getFilterUrl(), item.getFilePath(), params);
+					DownloadLogMapping logMapping = new DownloadLogMapping(user, item.getCreatedOn(), item.getStatus(),
+							item.getType(), item.getSourceType(), item.getNotes(), item.getFilterUrl(),
+							item.getFilePath().replace("/app/data/biodiv/", "/"), params);
 					downLoadLogList.add(logMapping);
 				} catch (Exception e) {
 					logger.error(e.getMessage());

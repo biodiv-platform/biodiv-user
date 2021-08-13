@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class DownloadLogMapping {
 
-	private Long id;
+	
 	private UserIbp user;
 	private Date createdOn;
 	private String status;
@@ -16,10 +16,9 @@ public class DownloadLogMapping {
 	private String filePath;
 	private Map<String, Object> params;
 
-	public DownloadLogMapping(Long id, UserIbp user, Date createdOn, String status, String type, String sourceType,
+	public DownloadLogMapping(UserIbp user, Date createdOn, String status, String type, String sourceType,
 			String notes, String filterUrl, String filePath, Map<String, Object> params) {
 		super();
-		this.id = id;
 		this.user = user;
 		this.createdOn = createdOn;
 		this.status = status;
@@ -34,14 +33,6 @@ public class DownloadLogMapping {
 	public DownloadLogMapping() {
 		super();
 
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public UserIbp getUser() {
