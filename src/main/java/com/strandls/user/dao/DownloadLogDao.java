@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -45,10 +48,13 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 	public List<DownloadLog> getDownloadLogList(String orderBy, Integer limit, Integer offset) {
 		Session session = sessionFactory.openSession();
 		List<DownloadLog> downloadLogList = new ArrayList<DownloadLog>();
-		String hql = "from DownloadLog where  status != 'Failed' order by :orderBy desc";
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<DownloadLog> cr = cb.createQuery(DownloadLog.class);
+		Root<DownloadLog> root = cr.from(DownloadLog.class);
+		cr.select(root).orderBy(cb.desc(root.get(orderBy)));
+
 		try {
-			Query query = session.createQuery(hql);
-			query.setParameter("orderBy", orderBy);
+			Query query = session.createQuery(cr);
 			query.setFirstResult(offset);
 			if (limit != null) {
 				query.setMaxResults(limit);
