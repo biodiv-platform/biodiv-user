@@ -1,6 +1,7 @@
 package com.strandls.user.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +52,15 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 							})
 							: null;
 
-					DownloadLogMapping logMapping = new DownloadLogMapping(user, item.getCreatedOn(), item.getStatus(),
-							item.getType(), item.getSourceType(), item.getNotes(), item.getFilterUrl(),
-							item.getFilePath().replace("/app/data/biodiv/", "/"), params);
+					String subString = item.getFilePath().startsWith("http")
+							? String.join("/",
+									Arrays.asList(item.getFilePath().split("/")).subList(4,
+											Arrays.asList(item.getFilePath().split("/")).size()))
+							: item.getFilePath().replace("/app/data/biodiv/", "");
+
+					DownloadLogMapping logMapping = new DownloadLogMapping(item.getId(), user, item.getCreatedOn(),
+							item.getStatus(), item.getType(), item.getSourceType(), item.getNotes(),
+							item.getFilterUrl(), subString, params);
 					downLoadLogList.add(logMapping);
 				} catch (Exception e) {
 					logger.error(e.getMessage());
