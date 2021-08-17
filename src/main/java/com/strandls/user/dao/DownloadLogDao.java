@@ -1,8 +1,9 @@
 package com.strandls.user.dao;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -45,13 +46,17 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public List<DownloadLog> getDownloadLogList(String orderBy, Integer limit, Integer offset) {
+	public List<DownloadLog> getDownloadLogList(String sourceType, String orderBy, Integer limit, Integer offset) {
 		Session session = sessionFactory.openSession();
 		List<DownloadLog> downloadLogList = new ArrayList<DownloadLog>();
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<DownloadLog> cr = cb.createQuery(DownloadLog.class);
 		Root<DownloadLog> root = cr.from(DownloadLog.class);
-		cr.select(root).orderBy(cb.desc(root.get(orderBy)));
+		if(sourceType!= null && !sourceType.isEmpty()) {
+			cr.select(root).where(cb.equal(root.get("sourceType"), sourceType)).orderBy(cb.desc(root.get(orderBy)));
+		}else {
+			cr.select(root).orderBy(cb.desc(root.get(orderBy)));
+		}
 
 		try {
 			Query query = session.createQuery(cr);
@@ -69,20 +74,25 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Long getDownloadLogTotal() {
+	public List<Map<String, Long>> getDownloadLogsAggregate() {
 		Session session = sessionFactory.openSession();
-		String qry = "select count(id) from download_log where  status != 'Failed'";
+		String qry = "select source_type, count(id) from download_log where  status != 'Failed' group by source_type";
+		List<Map<String, Long>> aggregationList = new ArrayList<Map<String, Long>>();
 
-		Long total = null;
 		try {
-			Query<BigInteger> query = session.createNativeQuery(qry);
-			total = query.getSingleResult().longValue();
+			Query<Object[]> query = session.createNativeQuery(qry);
+			query.getResultList().forEach(item -> {
+				Map<String, Long> res = new HashMap<String, Long>();
+				res.put(item[0] != null ? item[0].toString() : "Unknown", Long.parseLong(item[1].toString()));
+				aggregationList.add(res);
+			});
+			return aggregationList;
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		} finally {
 			session.close();
 		}
-		return total;
+		return aggregationList;
 	}
 
 }

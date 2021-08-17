@@ -38,12 +38,12 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 	private ObjectMapper om;
 
 	@Override
-	public DownloadLogListMapping getDownloadLogList(String orderBy, Integer offset, Integer limit) {
+	public DownloadLogListMapping getDownloadLogList(String sourceType,String orderBy, Integer offset, Integer limit) {
 		List<DownloadLogMapping> downLoadLogList = new ArrayList<DownloadLogMapping>();
 		DownloadLogListMapping result = new DownloadLogListMapping();
-		Long total = downloadLogDao.getDownloadLogTotal();
+		List<Map<String, Long>> aggregate = downloadLogDao.getDownloadLogsAggregate();
 		try {
-			downloadLogDao.getDownloadLogList(orderBy, offset, limit).forEach(item -> {
+			downloadLogDao.getDownloadLogList(sourceType,orderBy, offset, limit).forEach(item -> {
 				Map<String, Object> params = new HashMap<String, Object>();
 				try {
 					UserIbp user = userService.fetchUserIbp(item.getAuthorId());
@@ -66,7 +66,7 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 					logger.error(e.getMessage());
 				}
 			});
-			result.setCount(total);
+			result.setAggregate(aggregate);
 			result.setDownloadLogList(downLoadLogList);
 		} catch (Exception e) {
 			logger.error(e.getMessage());

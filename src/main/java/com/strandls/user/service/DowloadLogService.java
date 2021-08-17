@@ -7,7 +7,7 @@ import com.strandls.user.pojo.DownloadLogListMapping;
 
 public interface DowloadLogService {
 
-	public DownloadLogListMapping getDownloadLogList(String orderBy, Integer offset, Integer limit);
+	public DownloadLogListMapping getDownloadLogList( String sourceType,String orderBy, Integer offset, Integer limit);
 
 	public Boolean createDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
 

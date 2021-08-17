@@ -48,12 +48,12 @@ public class DownloadLogController {
 
 	public Response observationList(@DefaultValue("createdOn") @QueryParam("sort") String sortOn,
 			@DefaultValue("0") @QueryParam("offset") String Offset,
-			@DefaultValue("10") @QueryParam("limit") String Limit) {
+			@DefaultValue("10") @QueryParam("limit") String Limit, @QueryParam("sourceType") String sourceType) {
 
 		try {
 			Integer offset = Integer.parseInt(Offset);
 			Integer limit = Integer.parseInt(Limit);
-			DownloadLogListMapping result = downloadLogService.getDownloadLogList(sortOn, limit, offset);
+			DownloadLogListMapping result = downloadLogService.getDownloadLogList(sourceType,sortOn, limit, offset);
 			return Response.status(Status.OK).entity(result).build();
 
 		} catch (Exception e) {
