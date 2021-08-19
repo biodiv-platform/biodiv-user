@@ -83,8 +83,11 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 			Query<Object[]> query = session.createNativeQuery(qry);
 			query.getResultList().forEach(item -> {
 				Map<String, Long> res = new HashMap<String, Long>();
-				res.put(item[0] != null ? item[0].toString() : "Unknown", Long.parseLong(item[1].toString()));
-				aggregationList.add(res);
+				if(item[0] != null ) {
+					res.put(item[0].toString(), Long.parseLong(item[1].toString()));
+					aggregationList.add(res);
+				}
+				
 			});
 			return aggregationList;
 		} catch (Exception e) {

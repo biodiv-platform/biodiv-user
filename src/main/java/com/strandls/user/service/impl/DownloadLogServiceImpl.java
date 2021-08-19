@@ -38,25 +38,28 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 	private ObjectMapper om;
 
 	@Override
-	public DownloadLogListMapping getDownloadLogList(String sourceType,String orderBy, Integer offset, Integer limit) {
+	public DownloadLogListMapping getDownloadLogList(String sourceType, String orderBy, Integer offset, Integer limit) {
 		List<DownloadLogMapping> downLoadLogList = new ArrayList<DownloadLogMapping>();
 		DownloadLogListMapping result = new DownloadLogListMapping();
 		List<Map<String, Long>> aggregate = downloadLogDao.getDownloadLogsAggregate();
+
 		try {
-			downloadLogDao.getDownloadLogList(sourceType,orderBy, offset, limit).forEach(item -> {
+			downloadLogDao.getDownloadLogList(sourceType, orderBy, offset, limit).forEach(item -> {
 				Map<String, Object> params = new HashMap<String, Object>();
+				String subString = "";
 				try {
 					UserIbp user = userService.fetchUserIbp(item.getAuthorId());
 					params = item.getParamsMapAsText() != null
 							? om.readValue(item.getParamsMapAsText(), new TypeReference<Map<String, Object>>() {
 							})
 							: null;
-
-					String subString = item.getFilePath().startsWith("http")
-							? String.join("/",
-									Arrays.asList(item.getFilePath().split("/")).subList(4,
-											Arrays.asList(item.getFilePath().split("/")).size()))
-							: item.getFilePath().replace("/app/data/biodiv/", "");
+					if (item.getFilePath() != null) {
+						subString = item.getFilePath().startsWith("http")
+								? String.join("/",
+										Arrays.asList(item.getFilePath().split("/")).subList(4,
+												Arrays.asList(item.getFilePath().split("/")).size()))
+								: item.getFilePath().replace("/app/data/biodiv/", "");
+					}
 
 					DownloadLogMapping logMapping = new DownloadLogMapping(item.getId(), user, item.getCreatedOn(),
 							item.getStatus(), item.getType(), item.getSourceType(), item.getNotes(),
