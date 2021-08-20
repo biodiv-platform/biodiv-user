@@ -21,7 +21,7 @@ import com.strandls.user.util.AbstractDAO;
 
 public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadLogDao.class);
 
 	/**
 	 * @param sessionFactory

@@ -87,9 +87,7 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 				downloadLogData.getFileType().toUpperCase(), downloadLogData.getSourcetype(), 0L);
 
 		downloadLog = downloadLogDao.save(downloadLog);
-		if (downloadLog.getId() != null)
-			return true;
-		return false;
+		return downloadLog.getId() != null ? true : false;
 	}
 
 }
