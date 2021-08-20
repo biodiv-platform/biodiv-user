@@ -6,6 +6,7 @@ package com.strandls.user.service.impl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import com.strandls.user.service.AuthenticationService;
+import com.strandls.user.service.DowloadLogService;
 import com.strandls.user.service.LanguageService;
 import com.strandls.user.service.MailService;
 import com.strandls.user.service.RoleService;
@@ -28,5 +29,6 @@ public class UserServiceModule extends AbstractModule {
 		bind(UserVerificationService.class).to(UserVerificationServiceImpl.class).in(Scopes.SINGLETON);
 		bind(SMSService.class).to(SMSServiceImpl.class).in(Scopes.SINGLETON);
 		bind(LanguageService.class).to(LanguageServiceImpl.class).in(Scopes.SINGLETON);
+		bind(DowloadLogService.class).to(DownloadLogServiceImpl.class).in(Scopes.SINGLETON);
 	}
 }
