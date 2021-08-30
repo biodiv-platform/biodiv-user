@@ -83,7 +83,7 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 		Long authorId = Long.parseLong(profile.getId());
 
 		DownloadLog downloadLog = new DownloadLog(null, 0L, authorId, new Date(), downloadLogData.getFilePath(),
-				downloadLogData.getFilterUrl(), null, null, downloadLogData.getStatus().toLowerCase(),
+				downloadLogData.getFilterUrl(), downloadLogData.getNotes(), null, downloadLogData.getStatus().toLowerCase(),
 				downloadLogData.getFileType().toUpperCase(), downloadLogData.getSourcetype(), 0L);
 
 		downloadLog = downloadLogDao.save(downloadLog);
