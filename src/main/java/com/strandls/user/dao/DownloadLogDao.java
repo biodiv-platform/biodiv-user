@@ -1,5 +1,6 @@
 package com.strandls.user.dao;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,22 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 			session.close();
 		}
 		return downloadLogList;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Long getTotalDownloadLogs() {
+		Session session = sessionFactory.openSession();
+		String qry = "select count(id) from download_log where  status != 'Failed'";
+		Long total = null;
+		try {
+			Query<BigInteger> query = session.createNativeQuery(qry);
+			total = query.getSingleResult().longValue();
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		} finally {
+			session.close();
+		}
+		return total;
 	}
 
 	@SuppressWarnings("unchecked")
