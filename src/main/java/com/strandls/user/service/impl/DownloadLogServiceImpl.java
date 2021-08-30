@@ -74,7 +74,20 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
+		getDownloadLogCount(sourceType, result);
 		return result;
+	}
+
+	private void getDownloadLogCount(String sourceType, DownloadLogListMapping result) {
+		if (sourceType != null) {
+			result.getAggregate().forEach(item -> {
+				if (item.containsKey(sourceType)) {
+					result.setCount(item.get(sourceType));
+				}
+			});
+		} else {
+			result.setCount(downloadLogDao.getTotalDownloadLogs());
+		}
 	}
 
 	@Override
