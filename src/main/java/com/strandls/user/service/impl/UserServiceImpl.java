@@ -86,7 +86,8 @@ public class UserServiceImpl implements UserService {
 		return inputUserId;
 	}
 
-	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic) throws UnAuthorizedUserException {
+	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic)
+			throws UnAuthorizedUserException {
 		userId = validateUserForEdits(request, userId);
 		User user = userDao.findById(userId);
 
@@ -138,7 +139,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser) throws UnAuthorizedUserException {
+	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser)
+			throws UnAuthorizedUserException {
 
 		Long inputUserId = validateUserForEdits(request, inputUser.getId());
 		User user = userDao.findById(inputUserId);
@@ -214,6 +216,8 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.SPECIES_PARTICIPATION_OBSERVATION;
 		else if (objectType.equalsIgnoreCase(Constants.DOCUMENT))
 			objectType = Constants.CONTENT_EML_DOCUMENT;
+		else if (objectType.equalsIgnoreCase(Constants.SPECIES))
+			objectType = Constants.SPECIES_SPECIES;
 		Follow follow = followDao.findByObject(objectType, objectId, authorId);
 		return follow;
 	}
@@ -230,6 +234,8 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.SPECIES_PARTICIPATION_OBSERVATION;
 		else if (objectType.equalsIgnoreCase(Constants.DOCUMENT))
 			objectType = Constants.CONTENT_EML_DOCUMENT;
+		else if (objectType.equalsIgnoreCase(Constants.SPECIES))
+			objectType = Constants.SPECIES_SPECIES;
 		Follow follow = followDao.findByObject(objectType, objectId, userId);
 		if (follow == null) {
 			follow = new Follow(null, 0L, objectId, objectType, userId, new Date());
@@ -245,6 +251,8 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.SPECIES_PARTICIPATION_OBSERVATION;
 		else if (objectType.equalsIgnoreCase(Constants.DOCUMENT))
 			objectType = Constants.CONTENT_EML_DOCUMENT;
+		else if (objectType.equalsIgnoreCase(Constants.SPECIES))
+			objectType = Constants.SPECIES_SPECIES;
 		Follow follow = followDao.findByObject(objectType, objectId, userId);
 		if (follow != null) {
 			follow = followDao.delete(follow);
@@ -284,7 +292,7 @@ public class UserServiceImpl implements UserService {
 				token = firebaseDao.save(savedToken);
 			}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error(ex.getMessage());
 		}
 		return token;
 	}
@@ -307,6 +315,16 @@ public class UserServiceImpl implements UserService {
 			logger.error(ex.getMessage());
 		}
 		return null;
+	}
+
+	@Override
+	public List<User> getAllAdmins() {
+		List<Long> adminIdList = userDao.findRoleAdmin();
+		List<User> result = new ArrayList<User>();
+		for(Long adminId:adminIdList) {
+			result.add(fetchUser(adminId));
+		}
+		return result;
 	}
 
 }

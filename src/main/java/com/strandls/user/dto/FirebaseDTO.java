@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @XmlRootElement
 @JsonInclude(value = Include.NON_NULL)
 public class FirebaseDTO {
-
 	private String token;
 	private String title;
 	private String body;

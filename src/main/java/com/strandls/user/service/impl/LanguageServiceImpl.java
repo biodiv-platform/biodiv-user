@@ -13,7 +13,7 @@ public class LanguageServiceImpl implements LanguageService {
 
 	@Override
 	public Language getLanguageByTwoLetterCode(String language) {
-		Language lang = languageDao.findByPropertyWithCondition("twoLetterCode", language, "=");
+		Language lang = languageDao.findLangByProperty("twoLetterCode", language);
 		if (lang == null) {
 			return getCurrentLanguage();
 		}
@@ -21,7 +21,7 @@ public class LanguageServiceImpl implements LanguageService {
 	}
 	
 	private Language getCurrentLanguage() {
-		return languageDao.findByPropertyWithCondition("name", Language.DEFAULT_LANGUAGE, "=");
+		return languageDao.findLangByProperty("name", Language.DEFAULT_LANGUAGE);
 	}
 
 }

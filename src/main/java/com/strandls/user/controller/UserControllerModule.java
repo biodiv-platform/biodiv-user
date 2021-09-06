@@ -21,5 +21,6 @@ public class UserControllerModule extends AbstractModule {
 		bind(GoogleResource.class).in(Scopes.SINGLETON);
 		bind(GoogleAuthorizationResource.class).in(Scopes.SINGLETON);
 		bind(RolesController.class).in(Scopes.SINGLETON);
+		bind(DownloadLogController.class).in(Scopes.SINGLETON);
 	}
 }

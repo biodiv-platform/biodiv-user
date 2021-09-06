@@ -21,9 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 public class GoogleRecaptchaCheck {
-	
+
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	private static final String GOOGLE_API_ENDPOINT = "https://www.google.com/recaptcha/api/siteverify";
@@ -33,29 +32,31 @@ public class GoogleRecaptchaCheck {
 	}
 
 	public boolean isRobot(String userResponse) throws IOException {
-		
+
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-		
+
 		HttpPost postRequest = new HttpPost(GOOGLE_API_ENDPOINT);
-		
+
 		List<NameValuePair> postParameters = new ArrayList<>();
-		
-		postParameters.add(new BasicNameValuePair("secret", PropertyFileUtil.fetchProperty("config.properties", "recaptchaSecret")));
+
+		postParameters.add(new BasicNameValuePair("secret",
+				PropertyFileUtil.fetchProperty("config.properties", "recaptchaSecret")));
 		postParameters.add(new BasicNameValuePair("response", userResponse));
 		postRequest.setEntity(new UrlEncodedFormEntity(postParameters));
-		
+
 		CloseableHttpResponse response = null;
-		
+
 		log.debug(userResponse);
-		
+
 		try {
 			response = httpClient.execute(postRequest);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				InputStream body = response.getEntity().getContent();
 				ObjectMapper mapper = new ObjectMapper();
-				
-				Map<String,Object> json;
-				json = mapper.readValue(body, new TypeReference<Map<String,Object>>(){});
+
+				Map<String, Object> json;
+				json = mapper.readValue(body, new TypeReference<Map<String, Object>>() {
+				});
 				if (json != null && (Boolean) json.get("success")) {
 					return false;
 				}

@@ -64,4 +64,6 @@ public interface UserService {
 	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic) throws UnAuthorizedUserException;
 	
 	public String deleteUser(HttpServletRequest request, Long userId);
+	
+	public List<User> getAllAdmins();
 }

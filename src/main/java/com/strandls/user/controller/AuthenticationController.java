@@ -127,10 +127,10 @@ public class AuthenticationController {
 			ResponseBuilder response = Response.ok().entity(tokens);
 			if (status && !verification) {
 				NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, tokens.get(Constants.ACCESS_TOKEN).toString(),
-						"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);
+						"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60,false);//NOSONAR
 				NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN,
 						tokens.get(Constants.REFRESH_TOKEN).toString(), "/", AppUtil.getDomain(request), "",
-						10 * 24 * 60 * 60, false);
+						10 * 24 * 60 * 60, false);//NOSONAR
 				return response.cookie(accessToken).cookie(refreshToken).build();
 			} else {
 				return response.build();
@@ -276,9 +276,9 @@ public class AuthenticationController {
 		Map<String, Object> result = authenticationService.validateUser(request, id, otp);
 		if (Boolean.parseBoolean(result.get(Constants.STATUS).toString())) {
 			NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, result.get(Constants.ACCESS_TOKEN).toString(),
-					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);
+					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);//NOSONAR
 			NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN, result.get(Constants.REFRESH_TOKEN).toString(),
-					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);
+					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);//NOSONAR
 			return Response.ok().entity(result).cookie(accessToken).cookie(refreshToken).build();
 		}
 		return Response.status(Status.OK).entity(result).build();

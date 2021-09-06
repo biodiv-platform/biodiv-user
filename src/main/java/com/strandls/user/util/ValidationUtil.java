@@ -7,8 +7,8 @@ public class ValidationUtil {
 	
 	private ValidationUtil() {}
 
-	private static final String EMAIL_PATTERN = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$";
-	private static final String PHONE_PATTERN = "((\\+*)((0[ -]+)*|(91 )*)(\\d{12}+|\\d{10}+))|\\d{5}([- ]*)\\d{6}";
+	private static final String EMAIL_PATTERN = "^\\S+@\\S+$";
+	private static final String PHONE_PATTERN = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$";
 	
 	public static boolean validateEmail(String email) {
 		if (email == null) {

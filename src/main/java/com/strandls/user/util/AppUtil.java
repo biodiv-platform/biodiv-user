@@ -1,14 +1,15 @@
 package com.strandls.user.util;
 
 import java.net.URISyntaxException;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,10 @@ import com.google.common.net.InternetDomainName;
 
 public class AppUtil {
 
+	private final static Logger log = LoggerFactory.getLogger(AppUtil.class);
+
 	private AppUtil() {
 	}
-
-	private final static Logger log = LoggerFactory.getLogger(AppUtil.class);
 
 	public enum VERIFICATION_TYPE {
 		EMAIL, MOBILE
@@ -89,8 +90,8 @@ public class AppUtil {
 
 	public static String generateOTP() {
 		try {
-			String random = RandomStringUtils.randomNumeric(6);
-			return random;
+			Random random = SecureRandom.getInstance("SHA1PRNG");
+			return String.valueOf(random.nextInt(900000) + 100000);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}

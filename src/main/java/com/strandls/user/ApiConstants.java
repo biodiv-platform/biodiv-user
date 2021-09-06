@@ -8,8 +8,9 @@ package com.strandls.user;
  *
  */
 public class ApiConstants {
-	
-	private ApiConstants() {}
+
+	private ApiConstants() {
+	}
 
 	// ------------VERSIONING-------------
 	public static final String V1 = "/v1";
@@ -57,14 +58,21 @@ public class ApiConstants {
 	public static final String MODERATORLIST = "/moderatorList";
 	public static final String BULK = "/bulk";
 	public static final String SEND_NOTIFICATION = "/send-notification";
-	
+
 	public static final String UPDATE = "/update";
 	public static final String IMAGE = "/image";
 	public static final String DETAILS = "/details";
 	public static final String EMAIL_PREFERENCES = "/emailPreferences";
 	public static final String ROLES = "/roles";
-	
-	public static final String DELETE = "/delete";
 
+	public static final String DELETE = "/delete";
+	public static final String ADMIN = "/admin";
+	
+	public static final String DOWNLOADLOG = "/downloadLog";
+	public static final String LIST = "/list";
+	public static final String CREATE = "/create";
+
+	
+	
 
 }

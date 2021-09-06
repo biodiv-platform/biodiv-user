@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rabbitmq.client.Channel;
 import com.strandls.mail_utility.model.EnumModel.NOTIFICATION_DATA;
 import com.strandls.mail_utility.model.EnumModel.NOTIFICATION_FIELDS;
@@ -14,6 +17,9 @@ import com.strandls.user.dto.FirebaseDTO;
 import com.strandls.user.pojo.FirebaseTokens;
 
 public class NotificationScheduler extends Thread {
+
+	private static final Logger logger = LoggerFactory.getLogger(NotificationScheduler.class);
+
 
 	Channel channel;
 	FirebaseDTO firebaseDTO;
@@ -49,7 +55,7 @@ public class NotificationScheduler extends Thread {
 				}
 			}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error(ex.getMessage());
 		}
 	}
 
