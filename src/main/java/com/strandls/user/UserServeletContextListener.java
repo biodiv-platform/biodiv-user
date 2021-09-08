@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNSClient;
+import com.strandls.esmodule.controllers.EsServicesApi;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
@@ -116,7 +117,7 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				bind(JwtAuthenticator.class).toInstance(jwtAuthenticator);
 
 				bind(SessionFactory.class).toInstance(sessionFactory);
-
+				bind(EsServicesApi.class).in(Scopes.SINGLETON);
 				bind(ServletContainer.class).in(Scopes.SINGLETON);
 				serve("/api/*").with(ServletContainer.class, props);
 			}
