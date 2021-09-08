@@ -459,7 +459,7 @@ public class UserController {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response UserList(@PathParam("index") String index, @PathParam("type") String type,
 			@DefaultValue("10") @QueryParam("max") Integer max, @DefaultValue("0") @QueryParam("offset") Integer offset,
-			@DefaultValue("document.lastRevised") @QueryParam("sort") String sortOn,
+			@DefaultValue("user.dateCreated") @QueryParam("sort") String sortOn,
 			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
 			@QueryParam("createdOnMinDate") String createdOnMinDate,
 			@QueryParam("lastLoggedInMaxDate") String lastLoggedInMaxDate,

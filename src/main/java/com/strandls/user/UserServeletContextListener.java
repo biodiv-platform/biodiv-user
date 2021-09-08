@@ -46,6 +46,7 @@ import com.rabbitmq.client.Channel;
 import com.strandls.mail_utility.producer.RabbitMQProducer;
 import com.strandls.user.controller.UserControllerModule;
 import com.strandls.user.dao.UserDaoModule;
+import com.strandls.user.es.utils.EsUtilModule;
 import com.strandls.user.service.impl.UserServiceModule;
 import com.strandls.user.util.PropertyFileUtil;
 import com.strandls.user.util.SNSUtil;
@@ -121,7 +122,7 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				bind(ServletContainer.class).in(Scopes.SINGLETON);
 				serve("/api/*").with(ServletContainer.class, props);
 			}
-		}, new UserControllerModule(), new UserServiceModule(), new UserDaoModule());
+		}, new UserControllerModule(), new UserServiceModule(), new EsUtilModule(), new UserDaoModule());
 
 		return injector;
 
