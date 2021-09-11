@@ -84,12 +84,14 @@ public class UserListServiceImpl implements UserListService {
 	}
 
 	@Override
-	public MapAggregationResponse mapAggregate(String index, String type, String user, String createdOnMaxDate,
-			String createdOnMinDate, String lastLoggedInMaxDate, String lastLoggedInMinDate, String userGroupList,
-			String role, String geoShapeFilterField, MapSearchParams mapSearchParams) {
+	public MapAggregationResponse mapAggregate(String index, String type, String user, String profession,
+			String phoneNumber, String email, String sex, String insitution, String name, String userName,
+			String createdOnMaxDate, String createdOnMinDate, String userGroupList, String lastLoggedInMinDate,
+			String lastLoggedInMaxDate, String role, String geoShapeFilterField, MapSearchParams mapSearchParams) {
 
-		MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, createdOnMaxDate, createdOnMinDate,
-				userGroupList, lastLoggedInMinDate, lastLoggedInMaxDate, role, mapSearchParams);
+		MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
+				insitution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+				lastLoggedInMaxDate, role, mapSearchParams);
 
 		MapSearchQuery mapSearchQueryFilter;
 
@@ -100,22 +102,68 @@ public class UserListServiceImpl implements UserListService {
 //		filter panel data
 
 //      number refers to total field to aggregate
-		int totalLatch = 1;
+		int totalLatch = 4;
 
 //		latch count down
 		CountDownLatch latch = new CountDownLatch(totalLatch);
 
-		if (user != null && !user.isEmpty()) {
+//		profession
+		if (profession != null && !profession.isEmpty()) {
 
-			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, createdOnMaxDate, createdOnMinDate, userGroupList,
-					lastLoggedInMinDate, lastLoggedInMaxDate, omiter, mapSearchParams);
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, omiter, phoneNumber, email, sex, insitution,
+					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, mapSearchParams);
 
-			getAggregateLatch(index, type, UserIndex.ROLE.getValue(), null, mapSearchQueryFilter, mapAggResponse, latch,
+			getAggregateLatch(index, type, UserIndex.OCCUPATION_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse,
+					latch, geoShapeFilterField);
+
+		} else {
+			getAggregateLatch(index, type, UserIndex.OCCUPATION_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse, latch,
+					geoShapeFilterField);
+		}
+//		Institution
+		if (insitution != null && !insitution.isEmpty()) {
+
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, omiter,
+					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, mapSearchParams);
+
+			getAggregateLatch(index, type, UserIndex.INSTITUTION_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse,
+					latch, geoShapeFilterField);
+
+		} else {
+			getAggregateLatch(index, type, UserIndex.INSTITUTION_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse,
+					latch, geoShapeFilterField);
+		}
+
+//		role
+		if (role != null && !role.isEmpty()) {
+
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, insitution,
+					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, omiter, mapSearchParams);
+
+			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse, latch,
 					geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.ROLE.getValue(), null, mapSearchQuery, mapAggResponse, latch,
+			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse, latch,
 					geoShapeFilterField);
+		}
+
+//		usergroup
+		if (userGroupList != null && !userGroupList.isEmpty()) {
+
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, insitution,
+					name, userName, createdOnMaxDate, createdOnMinDate, omiter, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, mapSearchParams);
+
+			getAggregateLatch(index, type, UserIndex.USERGROUPID.getValue(), null, mapSearchQueryFilter, mapAggResponse,
+					latch, geoShapeFilterField);
+
+		} else {
+			getAggregateLatch(index, type, UserIndex.USERGROUPID.getValue(), null, mapSearchQuery, mapAggResponse,
+					latch, geoShapeFilterField);
 		}
 
 		try {
@@ -124,7 +172,10 @@ public class UserListServiceImpl implements UserListService {
 			logger.error(e.getMessage());
 		}
 
-		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE.getValue()).getGroupAggregation());
+		aggregationResponse.setProfession(mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID.getValue()).getGroupAggregation());
 
 		return aggregationResponse;
 	}

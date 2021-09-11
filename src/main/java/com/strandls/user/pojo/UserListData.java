@@ -10,7 +10,7 @@ import java.util.List;
 
 public class UserListData {
 
-	private List<UserMappingList> documentList;
+	private List<UserMappingList> userList;
 	private MapAggregationResponse aggregationData;
 	private long totalCount;
 
@@ -20,19 +20,23 @@ public class UserListData {
 	 * @param aggregationData
 	 * @param totalCount
 	 */
-	public UserListData(List<UserMappingList> documentList, MapAggregationResponse aggregationData, long totalCount) {
+	public UserListData(List<UserMappingList> userList, MapAggregationResponse aggregationData, long totalCount) {
 		super();
-		this.documentList = documentList;
+		this.userList = userList;
 		this.aggregationData = aggregationData;
 		this.totalCount = totalCount;
 	}
 
-	public List<UserMappingList> getDocumentList() {
-		return documentList;
+	public UserListData() {
+		super();
 	}
 
-	public void setDocumentList(List<UserMappingList> documentList) {
-		this.documentList = documentList;
+	public List<UserMappingList> getUserList() {
+		return userList;
+	}
+
+	public void setUserList(List<UserMappingList> userList) {
+		this.userList = userList;
 	}
 
 	public MapAggregationResponse getAggregationData() {

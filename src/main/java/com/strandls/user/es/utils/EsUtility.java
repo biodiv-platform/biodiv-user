@@ -109,8 +109,10 @@ public class EsUtility {
 		return mutlipolygon;
 	}
 
-	public MapSearchQuery getMapSearchQuery(String user, String createdOnMaxDate, String createdOnMinDate,
-			String userGroupList, String lastLoggedInMinDate, String lastLoggedInMaxDate,String role, MapSearchParams mapSearchParams) {
+	public MapSearchQuery getMapSearchQuery(String user, String profession, String phoneNumber, String email,
+			String sex, String insitution, String name, String userName, String createdOnMaxDate,
+			String createdOnMinDate, String userGroupList, String lastLoggedInMinDate, String lastLoggedInMaxDate,
+			String role, MapSearchParams mapSearchParams) {
 
 		MapSearchQuery mapSearchQuery = new MapSearchQuery();
 		List<MapAndBoolQuery> boolAndLists = new ArrayList<MapAndBoolQuery>();
@@ -131,9 +133,29 @@ public class EsUtility {
 			}
 
 //			user
-			List<Object> authorId = cSTSOT(user);
-			if (!authorId.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.USER.getValue(), authorId));
+			List<Object> userId = cSTSOT(user);
+			if (!userId.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USER.getValue(), userId));
+			}
+//			Occupation
+			List<Object> occupation = cSTSOT(profession);
+			if (!occupation.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.OCCUPATION.getValue(), occupation));
+			}
+//			email
+			List<Object> emailId = cSTSOT(email);
+			if (!emailId.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.EMAIL.getValue(), emailId));
+			}
+//			sexType
+			List<Object> sexType = cSTSOT(sex);
+			if (!sexType.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.SEX.getValue(), sexType));
+			}
+//			sexType
+			List<Object> phone = cSTSOT(phoneNumber);
+			if (!phone.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), sexType));
 			}
 
 //			Created on
@@ -193,10 +215,37 @@ public class EsUtility {
 				rangeAndLists.add(assignAndRange(UserIndex.LASTLOGGEDIN.getValue(), revisedOnMaxDateValue,
 						out.format(date), null));
 			}
-			
-			List<Object> userRole = cSTSOT(role);
-			if (!userRole.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.ROLE.getValue(), userRole));
+
+			// Institution
+			List<Object> institution = cSTSOT(insitution);
+			if (!institution.isEmpty()) {
+				institution.forEach(item -> {
+					andMatchPhraseQueries.add(assignAndMatchPhrase(UserIndex.INSTITUTION.getValue(), item.toString()));
+				});
+			}
+
+			// name
+			List<Object> nameList = cSTSOT(name);
+			if (!nameList.isEmpty()) {
+				nameList.forEach(item -> {
+					andMatchPhraseQueries.add(assignAndMatchPhrase(UserIndex.NAME.getValue(), item.toString()));
+				});
+			}
+
+			// username
+			List<Object> userNameList = cSTSOT(userName);
+			if (!userNameList.isEmpty()) {
+				userNameList.forEach(item -> {
+					andMatchPhraseQueries.add(assignAndMatchPhrase(UserIndex.USERNAME.getValue(), item.toString()));
+				});
+			}
+
+			// Role Name
+			List<Object> roleName = cSTSOT(role);
+			if (!roleName.isEmpty()) {
+				roleName.forEach(item -> {
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(UserIndex.ROLE.getValue(), item.toString()));
+				});
 			}
 
 			/**

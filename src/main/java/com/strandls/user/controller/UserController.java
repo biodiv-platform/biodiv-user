@@ -33,9 +33,10 @@ import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.esmodule.pojo.MapBoundParams;
 import com.strandls.esmodule.pojo.MapBounds;
-import com.strandls.esmodule.pojo.MapQueryResponse;
+import com.strandls.esmodule.pojo.MapGeoPoint;
 import com.strandls.esmodule.pojo.MapSearchParams;
 import com.strandls.esmodule.pojo.MapSearchParams.SortTypeEnum;
+import com.strandls.user.pojo.EsLocationListParams;
 import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.user.ApiConstants;
 import com.strandls.user.converter.UserConverter;
@@ -470,9 +471,16 @@ public class UserController {
 			@DefaultValue("") @QueryParam("role") String role,
 			@QueryParam("geoAggregationField") String geoAggregationField,
 			@QueryParam("geoShapeFilterField") String geoShapeFilterField,
-			@QueryParam("nestedField") String nestedField,
+			@QueryParam("nestedField") String nestedField, @DefaultValue("") @QueryParam("email") String email,
+			@DefaultValue("") @QueryParam("profession") String profession,
+			@DefaultValue("") @QueryParam("sex") String sex,
+			@DefaultValue("") @QueryParam("insitution") String insitution, ///
+			@DefaultValue("") @QueryParam("name") String name,
+			@DefaultValue("") @QueryParam("userName") String userName,
+			@DefaultValue("") @QueryParam("phoneNumber") String phoneNumber,
 			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
-			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation) {
+			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
+			@ApiParam(name = "location") EsLocationListParams location) {
 
 		try {
 
@@ -498,15 +506,27 @@ public class UserController {
 			mapSearchParams.setSortType(SortTypeEnum.DESC);
 			mapSearchParams.setMapBoundParams(mapBoundsParams);
 
+			String loc = location.getLocation();
+			if (loc != null) {
+				if (loc.contains("/")) {
+					String[] locationArray = loc.split("/");
+					List<List<MapGeoPoint>> multiPolygonPoint = esUtility.multiPolygonGenerator(locationArray);
+					mapBoundsParams.setMultipolygon(multiPolygonPoint);
+				} else {
+					mapBoundsParams.setPolygon(esUtility.polygonGenerator(loc));
+				}
+			}
+
 			MapAggregationResponse aggregationResult = null;
 
 			if (offset == 0) {
-				aggregationResult = userListService.mapAggregate(index, type, user, createdOnMaxDate, createdOnMinDate,
-						lastLoggedInMaxDate, lastLoggedInMinDate, userGroupList, role, geoShapeFilterField,
-						mapSearchParams);
+				aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
+						insitution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList,
+						lastLoggedInMinDate, lastLoggedInMaxDate, role, geoShapeFilterField, mapSearchParams);
 			}
-			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, createdOnMaxDate, createdOnMinDate,
-					userGroupList, lastLoggedInMinDate, lastLoggedInMaxDate, role, mapSearchParams);
+			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
+					insitution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, mapSearchParams);
 			UserListData result = userListService.getUserListData(index, type, geoAggregationField, geoShapeFilterField,
 					nestedField, aggregationResult, mapSearchQuery);
 			return Response.status(Status.OK).entity(result).build();

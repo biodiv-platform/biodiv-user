@@ -11,7 +11,8 @@ public interface UserListService {
 			String geoShapeFilterField, String nestedField, MapAggregationResponse aggregationResult,
 			MapSearchQuery querys);
 
-	public MapAggregationResponse mapAggregate(String index, String type, String user, String createdOnMaxDate,
-			String createdOnMinDate, String lastLoggedInMaxDate, String lastLoggedInMinDate, String userGroupList,
-			String role, String geoShapeFilterField, MapSearchParams mapSearchParams);
+	public MapAggregationResponse mapAggregate(String index, String type, String user, String profession,
+			String phoneNumber, String email, String sex, String insitution, String name, String userName,
+			String createdOnMaxDate, String createdOnMinDate, String userGroupList, String lastLoggedInMinDate,
+			String lastLoggedInMaxDate, String role,String geoShapeFilterField ,MapSearchParams mapSearchParams);
 }
