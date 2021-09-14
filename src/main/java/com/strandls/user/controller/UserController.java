@@ -458,8 +458,9 @@ public class UserController {
 	@Path(ApiConstants.LIST + "/{index}/{type}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response UserList(@PathParam("index") String index, @PathParam("type") String type,
-			@DefaultValue("10") @QueryParam("max") Integer max, @DefaultValue("0") @QueryParam("offset") Integer offset,
+	public Response UserList(@Context HttpServletRequest request, @PathParam("index") String index,
+			@PathParam("type") String type, @DefaultValue("10") @QueryParam("max") Integer max,
+			@DefaultValue("0") @QueryParam("offset") Integer offset,
 			@DefaultValue("user.dateCreated") @QueryParam("sort") String sortOn,
 			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
 			@QueryParam("createdOnMinDate") String createdOnMinDate,
@@ -474,7 +475,7 @@ public class UserController {
 			@QueryParam("nestedField") String nestedField, @DefaultValue("") @QueryParam("email") String email,
 			@DefaultValue("") @QueryParam("profession") String profession,
 			@DefaultValue("") @QueryParam("sex") String sex,
-			@DefaultValue("") @QueryParam("insitution") String insitution, ///
+			@DefaultValue("") @QueryParam("insitution") String insitution,
 			@DefaultValue("") @QueryParam("name") String name,
 			@DefaultValue("") @QueryParam("userName") String userName,
 			@DefaultValue("") @QueryParam("phoneNumber") String phoneNumber,
@@ -527,8 +528,8 @@ public class UserController {
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
 					insitution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, role, mapSearchParams);
-			UserListData result = userListService.getUserListData(index, type, geoAggregationField, geoShapeFilterField,
-					nestedField, aggregationResult, mapSearchQuery);
+			UserListData result = userListService.getUserListData(request, index, type, geoAggregationField,
+					geoShapeFilterField, nestedField, aggregationResult, mapSearchQuery);
 			return Response.status(Status.OK).entity(result).build();
 
 		} catch (Exception e) {

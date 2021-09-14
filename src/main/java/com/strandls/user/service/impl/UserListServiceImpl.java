@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.esmodule.pojo.AggregationResponse;
@@ -40,9 +44,9 @@ public class UserListServiceImpl implements UserListService {
 	private EsUtility esUtility;
 
 	@Override
-	public UserListData getUserListData(String index, String type, String geoAggregationField,
-			String geoShapeFilterField, String nestedField, MapAggregationResponse aggregationResult,
-			MapSearchQuery querys) {
+	public UserListData getUserListData(HttpServletRequest request, String index, String type,
+			String geoAggregationField, String geoShapeFilterField, String nestedField,
+			MapAggregationResponse aggregationResult, MapSearchQuery querys) {
 
 		UserListData listData = null;
 
@@ -56,6 +60,7 @@ public class UserListServiceImpl implements UserListService {
 			objectMapper.setDateFormat(df);
 			for (MapDocument document : documents) {
 				JsonNode rootNode = objectMapper.readTree(document.getDocument().toString());
+				rootNode = removeAdminOnlyField(request, rootNode);
 				try {
 
 					DocumentList.add(objectMapper.readValue(String.valueOf(rootNode), UserMappingList.class));
@@ -70,6 +75,25 @@ public class UserListServiceImpl implements UserListService {
 		}
 
 		return listData;
+	}
+
+	private JsonNode removeAdminOnlyField(HttpServletRequest request, JsonNode rootNode) {
+		String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if (header == null || !header.startsWith("Bearer ")) {
+
+			JsonNode child = ((ObjectNode) rootNode).get("user");
+			((ObjectNode) child).replace("email", null);
+			((ObjectNode) child).replace("userName", null);
+			((ObjectNode) child).replace("mobileNumber", null);
+			((ObjectNode) child).replace("location", null);
+			((ObjectNode) child).replace("latitude", null);
+			((ObjectNode) child).replace("longitude", null);
+			((ObjectNode) rootNode).replace("locationInformation", null);
+
+			return rootNode;
+		}
+
+		return rootNode;
 	}
 
 	@SuppressWarnings("unused")
@@ -110,30 +134,30 @@ public class UserListServiceImpl implements UserListService {
 //		profession
 		if (profession != null && !profession.isEmpty()) {
 
-			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, omiter, phoneNumber, email, sex, insitution,
-					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, omiter, phoneNumber, email, sex, insitution, name,
+					userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, role, mapSearchParams);
 
-			getAggregateLatch(index, type, UserIndex.OCCUPATION_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse,
-					latch, geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.OCCUPATION_KEYWORD.getValue(), null, mapSearchQueryFilter,
+					mapAggResponse, latch, geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.OCCUPATION_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse, latch,
-					geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.OCCUPATION_KEYWORD.getValue(), null, mapSearchQuery,
+					mapAggResponse, latch, geoShapeFilterField);
 		}
 //		Institution
 		if (insitution != null && !insitution.isEmpty()) {
 
-			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, omiter,
-					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, omiter, name,
+					userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, role, mapSearchParams);
 
-			getAggregateLatch(index, type, UserIndex.INSTITUTION_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse,
-					latch, geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.INSTITUTION_KEYWORD.getValue(), null, mapSearchQueryFilter,
+					mapAggResponse, latch, geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.INSTITUTION_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse,
-					latch, geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.INSTITUTION_KEYWORD.getValue(), null, mapSearchQuery,
+					mapAggResponse, latch, geoShapeFilterField);
 		}
 
 //		role
@@ -143,12 +167,12 @@ public class UserListServiceImpl implements UserListService {
 					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, omiter, mapSearchParams);
 
-			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse, latch,
-					geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQueryFilter,
+					mapAggResponse, latch, geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse, latch,
-					geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse,
+					latch, geoShapeFilterField);
 		}
 
 //		usergroup
@@ -172,8 +196,10 @@ public class UserListServiceImpl implements UserListService {
 			logger.error(e.getMessage());
 		}
 
-		aggregationResponse.setProfession(mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()).getGroupAggregation());
-		aggregationResponse.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse
+				.setProfession(mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse
+				.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation());
 		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD.getValue()).getGroupAggregation());
 		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID.getValue()).getGroupAggregation());
 
