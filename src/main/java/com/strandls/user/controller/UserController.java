@@ -475,7 +475,7 @@ public class UserController {
 			@QueryParam("nestedField") String nestedField, @DefaultValue("") @QueryParam("email") String email,
 			@DefaultValue("") @QueryParam("profession") String profession,
 			@DefaultValue("") @QueryParam("sex") String sex,
-			@DefaultValue("") @QueryParam("insitution") String insitution,
+			@DefaultValue("") @QueryParam("institution") String institution,
 			@DefaultValue("") @QueryParam("name") String name,
 			@DefaultValue("") @QueryParam("userName") String userName,
 			@DefaultValue("") @QueryParam("phoneNumber") String phoneNumber,
@@ -522,11 +522,11 @@ public class UserController {
 
 			if (offset == 0) {
 				aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
-						insitution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList,
+						institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList,
 						lastLoggedInMinDate, lastLoggedInMaxDate, role, geoShapeFilterField, mapSearchParams);
 			}
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
-					insitution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, role, mapSearchParams);
 			UserListData result = userListService.getUserListData(request, index, type, geoAggregationField,
 					geoShapeFilterField, nestedField, aggregationResult, mapSearchQuery);
