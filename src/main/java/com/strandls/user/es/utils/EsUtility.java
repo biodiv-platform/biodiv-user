@@ -150,7 +150,7 @@ public class EsUtility {
 //			email
 			List<Object> emailId = cSTSOT(email);
 			if (!emailId.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.EMAIL.getValue(), emailId));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.EMAIL_KEYWORD.getValue(), emailId));
 			}
 //			sexType
 			List<Object> sexType = cSTSOT(sex);
@@ -160,7 +160,7 @@ public class EsUtility {
 //			phoneNumber
 			List<Object> phone = cSTSOT(phoneNumber);
 			if (!phone.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), sexType));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), phone));
 			}
 //			 Institution
 			List<Object> institution = cSTSOT(insitution);
