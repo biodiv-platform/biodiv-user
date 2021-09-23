@@ -8,6 +8,7 @@ public class MapAggregationResponse {
 	private Map<String, Long> userGroup;
 	private Map<String, Long> institution;
 	private Map<String, Long> profession;
+	private Map<String, Long> sex;
 
 	public Map<String, Long> getUserGroup() {
 		return userGroup;
@@ -39,6 +40,14 @@ public class MapAggregationResponse {
 
 	public void setRole(Map<String, Long> role) {
 		this.role = role;
+	}
+
+	public Map<String, Long> getSex() {
+		return sex;
+	}
+
+	public void setSex(Map<String, Long> sex) {
+		this.sex = sex;
 	}
 
 }

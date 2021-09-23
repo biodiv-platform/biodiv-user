@@ -215,6 +215,7 @@ public class UserListServiceImpl implements UserListService {
 		aggregationResponse
 				.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation());
 		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse.setSex(mapAggResponse.get(UserIndex.SEX_KEYWORD.getValue()).getGroupAggregation());
 		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID.getValue()).getGroupAggregation());
 
 		return aggregationResponse;
