@@ -126,7 +126,7 @@ public class UserListServiceImpl implements UserListService {
 //		filter panel data
 
 //      number refers to total field to aggregate
-		int totalLatch = 4;
+		int totalLatch = 5;
 
 //		latch count down
 		CountDownLatch latch = new CountDownLatch(totalLatch);
@@ -187,6 +187,20 @@ public class UserListServiceImpl implements UserListService {
 
 		} else {
 			getAggregateLatch(index, type, UserIndex.USERGROUPID.getValue(), null, mapSearchQuery, mapAggResponse,
+					latch, geoShapeFilterField);
+		}
+//		sexType
+		if (sex != null && !sex.isEmpty()) {
+
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, omiter, insitution,
+					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, mapSearchParams);
+
+			getAggregateLatch(index, type, UserIndex.SEX_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse,
+					latch, geoShapeFilterField);
+
+		} else {
+			getAggregateLatch(index, type, UserIndex.SEX_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse,
 					latch, geoShapeFilterField);
 		}
 

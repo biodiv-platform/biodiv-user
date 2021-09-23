@@ -132,6 +132,11 @@ public class EsUtility {
 				boolAndLists.add(assignBoolAndQuery(UserIndex.USERGROUPID.getValue(), ugList));
 			}
 
+//			roles
+			List<Object> roleName = cSTSOT(role);
+			if (!roleName.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.ROLE_KEYWORD.getValue(), roleName));
+			}
 //			user
 			List<Object> userId = cSTSOT(user);
 			if (!userId.isEmpty()) {
@@ -140,7 +145,7 @@ public class EsUtility {
 //			Occupation
 			List<Object> occupation = cSTSOT(profession);
 			if (!occupation.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.OCCUPATION.getValue(), occupation));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.OCCUPATION_KEYWORD.getValue(), occupation));
 			}
 //			email
 			List<Object> emailId = cSTSOT(email);
@@ -150,12 +155,23 @@ public class EsUtility {
 //			sexType
 			List<Object> sexType = cSTSOT(sex);
 			if (!sexType.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.SEX.getValue(), sexType));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.SEX_KEYWORD.getValue(), sexType));
 			}
-//			sexType
+//			phoneNumber
 			List<Object> phone = cSTSOT(phoneNumber);
 			if (!phone.isEmpty()) {
 				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), sexType));
+			}
+//			 Institution
+			List<Object> institution = cSTSOT(insitution);
+			if (!institution.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.INSTITUTION_KEYWORD.getValue(), institution));
+			}
+
+			// username
+			List<Object> userNameList = cSTSOT(userName);
+			if (!userNameList.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USERNAME_KEYWORD.getValue(), userNameList));
 			}
 
 //			Created on
@@ -214,38 +230,6 @@ public class EsUtility {
 			if (revisedOnMinDateValue == null && revisedOnMaxDateValue != null) {
 				rangeAndLists.add(assignAndRange(UserIndex.LASTLOGGEDIN.getValue(), revisedOnMaxDateValue,
 						out.format(date), null));
-			}
-
-			// Institution
-			List<Object> institution = cSTSOT(insitution);
-			if (!institution.isEmpty()) {
-				institution.forEach(item -> {
-					andMatchPhraseQueries.add(assignAndMatchPhrase(UserIndex.INSTITUTION.getValue(), item.toString()));
-				});
-			}
-
-			// name
-			List<Object> nameList = cSTSOT(name);
-			if (!nameList.isEmpty()) {
-				nameList.forEach(item -> {
-					andMatchPhraseQueries.add(assignAndMatchPhrase(UserIndex.NAME.getValue(), item.toString()));
-				});
-			}
-
-			// username
-			List<Object> userNameList = cSTSOT(userName);
-			if (!userNameList.isEmpty()) {
-				userNameList.forEach(item -> {
-					andMatchPhraseQueries.add(assignAndMatchPhrase(UserIndex.USERNAME.getValue(), item.toString()));
-				});
-			}
-
-			// Role Name
-			List<Object> roleName = cSTSOT(role);
-			if (!roleName.isEmpty()) {
-				roleName.forEach(item -> {
-					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(UserIndex.ROLE.getValue(), item.toString()));
-				});
 			}
 
 			/**
