@@ -209,8 +209,8 @@ public class EsUtility {
 			String revisedOnMinDateValue = null;
 
 			try {
-				if (lastLoggedInMaxDate != null) {
-					revisedOnMinDateValue = lastLoggedInMaxDate;
+				if (lastLoggedInMinDate != null) {
+					revisedOnMinDateValue = lastLoggedInMinDate;
 				}
 				if (lastLoggedInMaxDate != null) {
 					revisedOnMaxDateValue = lastLoggedInMaxDate;
@@ -220,12 +220,12 @@ public class EsUtility {
 			}
 			if (revisedOnMinDateValue != null && revisedOnMaxDateValue != null) {
 
-				rangeAndLists.add(assignAndRange(UserIndex.LASTLOGGEDIN.getValue(), revisedOnMaxDateValue,
-						revisedOnMinDateValue, null));
+				rangeAndLists.add(assignAndRange(UserIndex.LASTLOGGEDIN.getValue(), revisedOnMinDateValue,
+						revisedOnMaxDateValue, null));
 			}
 			if (revisedOnMinDateValue != null && revisedOnMaxDateValue == null) {
-				rangeAndLists.add(assignAndRange(UserIndex.LASTLOGGEDIN.getValue(), out.format(date),
-						revisedOnMinDateValue, null));
+				rangeAndLists.add(assignAndRange(UserIndex.LASTLOGGEDIN.getValue(), revisedOnMinDateValue,
+						out.format(date), null));
 			}
 			if (revisedOnMinDateValue == null && revisedOnMaxDateValue != null) {
 				rangeAndLists.add(assignAndRange(UserIndex.LASTLOGGEDIN.getValue(), revisedOnMaxDateValue,
