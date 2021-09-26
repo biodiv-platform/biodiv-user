@@ -165,7 +165,7 @@ public class UserListServiceImpl implements UserListService {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, insitution,
 					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, omiter, mapSearchParams);
+					lastLoggedInMaxDate, role, mapSearchParams);
 
 			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD_NESTED.getValue(), null, mapSearchQueryFilter,
 					mapAggResponse, latch, geoShapeFilterField);
@@ -179,7 +179,7 @@ public class UserListServiceImpl implements UserListService {
 		if (userGroupList != null && !userGroupList.isEmpty()) {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, insitution,
-					name, userName, createdOnMaxDate, createdOnMinDate, omiter, lastLoggedInMinDate,
+					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, role, mapSearchParams);
 
 			getAggregateLatch(index, type, UserIndex.USERGROUPID_NESTED.getValue(), null, mapSearchQueryFilter, mapAggResponse,
