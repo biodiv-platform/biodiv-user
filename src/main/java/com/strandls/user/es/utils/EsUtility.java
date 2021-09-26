@@ -44,8 +44,11 @@ public class EsUtility {
 
 	}
 
-	private MapAndBoolQuery assignBoolAndQuery(String key, List<Object> values) {
+	private MapAndBoolQuery assignBoolAndQuery(String key, List<Object> values, String path) {
 		MapAndBoolQuery andBool = new MapAndBoolQuery();
+		if(path != null && !path.isEmpty()) {
+			andBool.setPath(path);
+		}
 		andBool.setKey(key);
 		andBool.setValues(values);
 		return andBool;
@@ -53,15 +56,22 @@ public class EsUtility {
 	}
 
 	@SuppressWarnings("unused")
-	private MapAndMatchPhraseQuery assignAndMatchPhrase(String key, String value) {
+	private MapAndMatchPhraseQuery assignAndMatchPhrase(String key, String value, String path) {
 		MapAndMatchPhraseQuery andMatchPhrase = new MapAndMatchPhraseQuery();
+		if(path != null && !path.isEmpty()) {
+			andMatchPhrase.setPath(path);
+		}
 		andMatchPhrase.setKey(key);
 		andMatchPhrase.setValue(value);
 		return andMatchPhrase;
 	}
 
-	private MapOrMatchPhraseQuery assignOrMatchPhrase(String key, String value) {
+	@SuppressWarnings("unused")
+	private MapOrMatchPhraseQuery assignOrMatchPhrase(String key, String value,String path) {
 		MapOrMatchPhraseQuery orMatchPhrase = new MapOrMatchPhraseQuery();
+		if(path != null && !path.isEmpty()) {
+			orMatchPhrase.setPath(path);
+		}
 		orMatchPhrase.setKey(key);
 		orMatchPhrase.setValue(value);
 		return orMatchPhrase;
@@ -72,17 +82,10 @@ public class EsUtility {
 		andRange.setKey(key);
 		andRange.setStart(start);
 		andRange.setEnd(end);
-		andRange.setPath(path);
-		return andRange;
-	}
-
-	// for comma separated string ids
-	@SuppressWarnings("unused")
-	private void assignOrMatchPhraseArray(String ids, String key, List<MapOrMatchPhraseQuery> orMatchPhraseQueriesnew) {
-		String[] list = ids.split(",");
-		for (String o : list) {
-			orMatchPhraseQueriesnew.add(assignOrMatchPhrase(key, o));
+		if(path != null && !path.isEmpty()) {
+			andRange.setPath(path);
 		}
+		return andRange;
 	}
 
 	public List<MapGeoPoint> polygonGenerator(String locationArray) {
@@ -129,49 +132,49 @@ public class EsUtility {
 //			userGroupList
 			List<Object> ugList = cSTSOT(userGroupList);
 			if (!ugList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.USERGROUPID.getValue(), ugList));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USERGROUPID.getValue(), ugList,UserIndex.USER_GROUP_NESTED_PATH.getValue()));
 			}
 
 //			roles
 			List<Object> roleName = cSTSOT(role);
 			if (!roleName.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.ROLE_KEYWORD.getValue(), roleName));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.ROLE_KEYWORD.getValue(), roleName,UserIndex.USER_GROUP_NESTED_PATH.getValue()));
 			}
 //			user
 			List<Object> userId = cSTSOT(user);
 			if (!userId.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.USER.getValue(), userId));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USER.getValue(), userId,null));
 			}
 //			Occupation
 			List<Object> occupation = cSTSOT(profession);
 			if (!occupation.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.OCCUPATION_KEYWORD.getValue(), occupation));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.OCCUPATION_KEYWORD.getValue(), occupation,null));
 			}
 //			email
 			List<Object> emailId = cSTSOT(email);
 			if (!emailId.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.EMAIL_KEYWORD.getValue(), emailId));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.EMAIL_KEYWORD.getValue(), emailId,null));
 			}
 //			sexType
 			List<Object> sexType = cSTSOT(sex);
 			if (!sexType.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.SEX_KEYWORD.getValue(), sexType));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.SEX_KEYWORD.getValue(), sexType,null));
 			}
 //			phoneNumber
 			List<Object> phone = cSTSOT(phoneNumber);
 			if (!phone.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), phone));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), phone,null));
 			}
 //			 Institution
 			List<Object> institution = cSTSOT(insitution);
 			if (!institution.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.INSTITUTION_KEYWORD.getValue(), institution));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.INSTITUTION_KEYWORD.getValue(), institution,null));
 			}
 
 			// username
 			List<Object> userNameList = cSTSOT(userName);
 			if (!userNameList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.USERNAME_KEYWORD.getValue(), userNameList));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USERNAME_KEYWORD.getValue(), userNameList,null));
 			}
 
 //			Created on
