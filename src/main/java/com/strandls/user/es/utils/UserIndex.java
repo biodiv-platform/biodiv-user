@@ -12,7 +12,9 @@ public enum UserIndex {
 	LOCATION("locationInformation.location"),
 	LASTLOGGEDIN("user.lastLoginDate"),
 	ROLE_KEYWORD("userGroup.role.keyword"),
-	USER("user.id"), USERGROUPID("userGroup.usergroupids"),
+	ROLE_KEYWORD_NESTED("nested.userGroup.role.keyword"),
+	USER("user.id"), USERGROUPID_NESTED("nested.userGroup.usergroupids"),
+	USERGROUPID("userGroup.usergroupids"),
 	USER_GROUP_NESTED_PATH("userGroup");
 
 	private String field;

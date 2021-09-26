@@ -167,11 +167,11 @@ public class UserListServiceImpl implements UserListService {
 					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, omiter, mapSearchParams);
 
-			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQueryFilter,
+			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD_NESTED.getValue(), null, mapSearchQueryFilter,
 					mapAggResponse, latch, geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse,
+			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD_NESTED.getValue(), null, mapSearchQuery, mapAggResponse,
 					latch, geoShapeFilterField);
 		}
 
@@ -182,11 +182,11 @@ public class UserListServiceImpl implements UserListService {
 					name, userName, createdOnMaxDate, createdOnMinDate, omiter, lastLoggedInMinDate,
 					lastLoggedInMaxDate, role, mapSearchParams);
 
-			getAggregateLatch(index, type, UserIndex.USERGROUPID.getValue(), null, mapSearchQueryFilter, mapAggResponse,
+			getAggregateLatch(index, type, UserIndex.USERGROUPID_NESTED.getValue(), null, mapSearchQueryFilter, mapAggResponse,
 					latch, geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.USERGROUPID.getValue(), null, mapSearchQuery, mapAggResponse,
+			getAggregateLatch(index, type, UserIndex.USERGROUPID_NESTED.getValue(), null, mapSearchQuery, mapAggResponse,
 					latch, geoShapeFilterField);
 		}
 //		sexType
@@ -214,9 +214,9 @@ public class UserListServiceImpl implements UserListService {
 				.setProfession(mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()).getGroupAggregation());
 		aggregationResponse
 				.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation());
-		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD_NESTED.getValue()).getGroupAggregation());
 		aggregationResponse.setSex(mapAggResponse.get(UserIndex.SEX_KEYWORD.getValue()).getGroupAggregation());
-		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID.getValue()).getGroupAggregation());
+		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()).getGroupAggregation());
 
 		return aggregationResponse;
 	}
