@@ -470,6 +470,8 @@ public class UserController {
 			@QueryParam("right") Double right, @QueryParam("top") Double top, @QueryParam("bottom") Double bottom,
 			@DefaultValue("") @QueryParam("userGroupList") String userGroupList,
 			@DefaultValue("") @QueryParam("role") String role,
+			@DefaultValue("") @QueryParam("taxonomyList") String taxonomyList,
+			@DefaultValue("") @QueryParam("taxonRole") String taxonRole,
 			@QueryParam("geoAggregationField") String geoAggregationField,
 			@QueryParam("geoShapeFilterField") String geoShapeFilterField,
 			@QueryParam("nestedField") String nestedField, @DefaultValue("") @QueryParam("email") String email,
@@ -520,14 +522,13 @@ public class UserController {
 
 			MapAggregationResponse aggregationResult = null;
 
-			if (offset == 0) {
-				aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
-						institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList,
-						lastLoggedInMinDate, lastLoggedInMaxDate, role, geoShapeFilterField, mapSearchParams);
-			}
+			aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
+					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, geoShapeFilterField, taxonRole, taxonomyList, mapSearchParams);
+
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
 					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, mapSearchParams);
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 			UserListData result = userListService.getUserListData(request, index, type, geoAggregationField,
 					geoShapeFilterField, nestedField, aggregationResult, mapSearchQuery);
 			return Response.status(Status.OK).entity(result).build();

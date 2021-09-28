@@ -5,6 +5,7 @@ import java.util.Map;
 public class MapAggregationResponse {
 
 	private Map<String, Long> role;
+	private Map<String, Long> taxonomyRole;
 	private Map<String, Long> userGroup;
 	private Map<String, Long> institution;
 	private Map<String, Long> profession;
@@ -48,6 +49,14 @@ public class MapAggregationResponse {
 
 	public void setSex(Map<String, Long> sex) {
 		this.sex = sex;
+	}
+
+	public Map<String, Long> getTaxonomyRole() {
+		return taxonomyRole;
+	}
+
+	public void setTaxonomyRole(Map<String, Long> taxonomyRole) {
+		this.taxonomyRole = taxonomyRole;
 	}
 
 }

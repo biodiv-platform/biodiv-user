@@ -46,7 +46,7 @@ public class EsUtility {
 
 	private MapAndBoolQuery assignBoolAndQuery(String key, List<Object> values, String path) {
 		MapAndBoolQuery andBool = new MapAndBoolQuery();
-		if(path != null && !path.isEmpty()) {
+		if (path != null && !path.isEmpty()) {
 			andBool.setPath(path);
 		}
 		andBool.setKey(key);
@@ -58,7 +58,7 @@ public class EsUtility {
 	@SuppressWarnings("unused")
 	private MapAndMatchPhraseQuery assignAndMatchPhrase(String key, String value, String path) {
 		MapAndMatchPhraseQuery andMatchPhrase = new MapAndMatchPhraseQuery();
-		if(path != null && !path.isEmpty()) {
+		if (path != null && !path.isEmpty()) {
 			andMatchPhrase.setPath(path);
 		}
 		andMatchPhrase.setKey(key);
@@ -67,9 +67,9 @@ public class EsUtility {
 	}
 
 	@SuppressWarnings("unused")
-	private MapOrMatchPhraseQuery assignOrMatchPhrase(String key, String value,String path) {
+	private MapOrMatchPhraseQuery assignOrMatchPhrase(String key, String value, String path) {
 		MapOrMatchPhraseQuery orMatchPhrase = new MapOrMatchPhraseQuery();
-		if(path != null && !path.isEmpty()) {
+		if (path != null && !path.isEmpty()) {
 			orMatchPhrase.setPath(path);
 		}
 		orMatchPhrase.setKey(key);
@@ -82,7 +82,7 @@ public class EsUtility {
 		andRange.setKey(key);
 		andRange.setStart(start);
 		andRange.setEnd(end);
-		if(path != null && !path.isEmpty()) {
+		if (path != null && !path.isEmpty()) {
 			andRange.setPath(path);
 		}
 		return andRange;
@@ -115,7 +115,7 @@ public class EsUtility {
 	public MapSearchQuery getMapSearchQuery(String user, String profession, String phoneNumber, String email,
 			String sex, String insitution, String name, String userName, String createdOnMaxDate,
 			String createdOnMinDate, String userGroupList, String lastLoggedInMinDate, String lastLoggedInMaxDate,
-			String role, MapSearchParams mapSearchParams) {
+			String role, String taxonRole, String taxonomyList, MapSearchParams mapSearchParams) {
 
 		MapSearchQuery mapSearchQuery = new MapSearchQuery();
 		List<MapAndBoolQuery> boolAndLists = new ArrayList<MapAndBoolQuery>();
@@ -132,49 +132,66 @@ public class EsUtility {
 //			userGroupList
 			List<Object> ugList = cSTSOT(userGroupList);
 			if (!ugList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.USERGROUPID.getValue(), ugList,UserIndex.USER_GROUP_NESTED_PATH.getValue()));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USERGROUPID.getValue(), ugList,
+						UserIndex.USER_GROUP_NESTED_PATH.getValue()));
 			}
 
-//			roles
+//			ug_roles
 			List<Object> roleName = cSTSOT(role);
 			if (!roleName.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.ROLE_KEYWORD.getValue(), roleName,UserIndex.USER_GROUP_NESTED_PATH.getValue()));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.ROLE_KEYWORD.getValue(), roleName,
+						UserIndex.USER_GROUP_NESTED_PATH.getValue()));
 			}
+
+//			userGroupList
+			List<Object> taxonList = cSTSOT(taxonomyList);
+			if (!taxonList.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.TAXONOMYID.getValue(), taxonList,
+						UserIndex.TAXONOMY_NESTED_PATH.getValue()));
+			}
+
+//			taxon_roles
+			List<Object> taxonRoleList = cSTSOT(taxonRole);
+			if (!taxonRoleList.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.TAXON_ROLE.getValue(), taxonRoleList,
+						UserIndex.TAXONOMY_NESTED_PATH.getValue()));
+			}
+
 //			user
 			List<Object> userId = cSTSOT(user);
 			if (!userId.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.USER.getValue(), userId,null));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USER.getValue(), userId, null));
 			}
 //			Occupation
 			List<Object> occupation = cSTSOT(profession);
 			if (!occupation.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.OCCUPATION_KEYWORD.getValue(), occupation,null));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.OCCUPATION_KEYWORD.getValue(), occupation, null));
 			}
 //			email
 			List<Object> emailId = cSTSOT(email);
 			if (!emailId.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.EMAIL_KEYWORD.getValue(), emailId,null));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.EMAIL_KEYWORD.getValue(), emailId, null));
 			}
 //			sexType
 			List<Object> sexType = cSTSOT(sex);
 			if (!sexType.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.SEX_KEYWORD.getValue(), sexType,null));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.SEX_KEYWORD.getValue(), sexType, null));
 			}
 //			phoneNumber
 			List<Object> phone = cSTSOT(phoneNumber);
 			if (!phone.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), phone,null));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.PHONE.getValue(), phone, null));
 			}
 //			 Institution
 			List<Object> institution = cSTSOT(insitution);
 			if (!institution.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.INSTITUTION_KEYWORD.getValue(), institution,null));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.INSTITUTION_KEYWORD.getValue(), institution, null));
 			}
 
 			// username
 			List<Object> userNameList = cSTSOT(userName);
 			if (!userNameList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.USERNAME_KEYWORD.getValue(), userNameList,null));
+				boolAndLists.add(assignBoolAndQuery(UserIndex.USERNAME_KEYWORD.getValue(), userNameList, null));
 			}
 
 //			Created on

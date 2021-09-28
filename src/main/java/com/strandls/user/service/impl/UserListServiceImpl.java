@@ -111,11 +111,12 @@ public class UserListServiceImpl implements UserListService {
 	public MapAggregationResponse mapAggregate(String index, String type, String user, String profession,
 			String phoneNumber, String email, String sex, String insitution, String name, String userName,
 			String createdOnMaxDate, String createdOnMinDate, String userGroupList, String lastLoggedInMinDate,
-			String lastLoggedInMaxDate, String role, String geoShapeFilterField, MapSearchParams mapSearchParams) {
+			String lastLoggedInMaxDate, String role, String geoShapeFilterField, String taxonRole, String taxonomyList,
+			MapSearchParams mapSearchParams) {
 
 		MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
 				insitution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-				lastLoggedInMaxDate, role, mapSearchParams);
+				lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 
 		MapSearchQuery mapSearchQueryFilter;
 
@@ -126,7 +127,7 @@ public class UserListServiceImpl implements UserListService {
 //		filter panel data
 
 //      number refers to total field to aggregate
-		int totalLatch = 5;
+		int totalLatch = 6;
 
 //		latch count down
 		CountDownLatch latch = new CountDownLatch(totalLatch);
@@ -136,7 +137,7 @@ public class UserListServiceImpl implements UserListService {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, omiter, phoneNumber, email, sex, insitution, name,
 					userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, mapSearchParams);
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 
 			getAggregateLatch(index, type, UserIndex.OCCUPATION_KEYWORD.getValue(), null, mapSearchQueryFilter,
 					mapAggResponse, latch, geoShapeFilterField);
@@ -150,7 +151,7 @@ public class UserListServiceImpl implements UserListService {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, omiter, name,
 					userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, mapSearchParams);
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 
 			getAggregateLatch(index, type, UserIndex.INSTITUTION_KEYWORD.getValue(), null, mapSearchQueryFilter,
 					mapAggResponse, latch, geoShapeFilterField);
@@ -165,14 +166,14 @@ public class UserListServiceImpl implements UserListService {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, insitution,
 					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, mapSearchParams);
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 
 			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD_NESTED.getValue(), null, mapSearchQueryFilter,
 					mapAggResponse, latch, geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD_NESTED.getValue(), null, mapSearchQuery, mapAggResponse,
-					latch, geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.ROLE_KEYWORD_NESTED.getValue(), null, mapSearchQuery,
+					mapAggResponse, latch, geoShapeFilterField);
 		}
 
 //		usergroup
@@ -180,27 +181,42 @@ public class UserListServiceImpl implements UserListService {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex, insitution,
 					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, mapSearchParams);
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 
-			getAggregateLatch(index, type, UserIndex.USERGROUPID_NESTED.getValue(), null, mapSearchQueryFilter, mapAggResponse,
-					latch, geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.USERGROUPID_NESTED.getValue(), null, mapSearchQueryFilter,
+					mapAggResponse, latch, geoShapeFilterField);
 
 		} else {
-			getAggregateLatch(index, type, UserIndex.USERGROUPID_NESTED.getValue(), null, mapSearchQuery, mapAggResponse,
-					latch, geoShapeFilterField);
+			getAggregateLatch(index, type, UserIndex.USERGROUPID_NESTED.getValue(), null, mapSearchQuery,
+					mapAggResponse, latch, geoShapeFilterField);
 		}
 //		sexType
 		if (sex != null && !sex.isEmpty()) {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, omiter, insitution,
 					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, mapSearchParams);
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 
 			getAggregateLatch(index, type, UserIndex.SEX_KEYWORD.getValue(), null, mapSearchQueryFilter, mapAggResponse,
 					latch, geoShapeFilterField);
 
 		} else {
 			getAggregateLatch(index, type, UserIndex.SEX_KEYWORD.getValue(), null, mapSearchQuery, mapAggResponse,
+					latch, geoShapeFilterField);
+		}
+
+//		taxonRole
+		if (taxonRole != null && !taxonRole.isEmpty()) {
+
+			mapSearchQueryFilter = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, omiter, insitution,
+					name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
+
+			getAggregateLatch(index, type, UserIndex.TAXON_ROLE_NESTED.getValue(), null, mapSearchQueryFilter,
+					mapAggResponse, latch, geoShapeFilterField);
+
+		} else {
+			getAggregateLatch(index, type, UserIndex.TAXON_ROLE_NESTED.getValue(), null, mapSearchQuery, mapAggResponse,
 					latch, geoShapeFilterField);
 		}
 
@@ -216,7 +232,10 @@ public class UserListServiceImpl implements UserListService {
 				.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation());
 		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD_NESTED.getValue()).getGroupAggregation());
 		aggregationResponse.setSex(mapAggResponse.get(UserIndex.SEX_KEYWORD.getValue()).getGroupAggregation());
-		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()).getGroupAggregation());
+		aggregationResponse
+				.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()).getGroupAggregation());
+		aggregationResponse
+				.setTaxonomyRole(mapAggResponse.get(UserIndex.TAXON_ROLE_NESTED.getValue()).getGroupAggregation());
 
 		return aggregationResponse;
 	}
