@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.strandls.esmodule.ApiException;
 import com.strandls.user.dto.FirebaseDTO;
 import com.strandls.user.exception.UnAuthorizedUserException;
 import com.strandls.user.pojo.FirebaseTokens;
@@ -55,15 +56,17 @@ public interface UserService {
 
 	public void sendPushNotifications(FirebaseDTO firebaseDTO);
 
-	public User updateUserDetails(HttpServletRequest request, UserDetails inputUser) throws UnAuthorizedUserException;
+	public User updateUserDetails(HttpServletRequest request, UserDetails inputUser) throws UnAuthorizedUserException, ApiException;
 
-	public User updateEmailPreferences(HttpServletRequest request, UserEmailPreferences inputUser) throws UnAuthorizedUserException;
+	public User updateEmailPreferences(HttpServletRequest request, UserEmailPreferences inputUser) throws UnAuthorizedUserException, ApiException;
 
-	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser) throws UnAuthorizedUserException;
+	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser) throws UnAuthorizedUserException, ApiException;
 
-	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic) throws UnAuthorizedUserException;
+	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic) throws UnAuthorizedUserException, ApiException;
 	
 	public String deleteUser(HttpServletRequest request, Long userId);
 	
 	public List<User> getAllAdmins();
+
+	public void esUserUpdate(User user) throws ApiException;
 }

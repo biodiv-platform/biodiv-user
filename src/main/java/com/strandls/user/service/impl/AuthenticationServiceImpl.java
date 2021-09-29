@@ -237,6 +237,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				return response;
 			}
 			user = userDao.save(user);
+			userService.esUserUpdate(user);
 			boolean isManual = userDTO.getMode().equalsIgnoreCase(AppUtil.AUTH_MODE.MANUAL.getAction());
 			if (!isManual) {
 				user.setAccountLocked(false);

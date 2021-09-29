@@ -5,7 +5,9 @@ package com.strandls.user.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -17,17 +19,23 @@ import org.slf4j.LoggerFactory;
 
 import com.rabbitmq.client.Channel;
 import com.strandls.authentication_utility.util.AuthUtil;
+import com.strandls.esmodule.ApiException;
+import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.user.Constants;
 import com.strandls.user.dao.FirebaseDao;
 import com.strandls.user.dao.FollowDao;
 import com.strandls.user.dao.UserDao;
 import com.strandls.user.dto.FirebaseDTO;
+import com.strandls.user.es.utils.UserIndex;
 import com.strandls.user.exception.UnAuthorizedUserException;
 import com.strandls.user.pojo.FirebaseTokens;
 import com.strandls.user.pojo.Follow;
+import com.strandls.user.pojo.Location;
 import com.strandls.user.pojo.Role;
 import com.strandls.user.pojo.User;
+import com.strandls.user.pojo.UserEsMapping;
 import com.strandls.user.pojo.UserIbp;
+import com.strandls.user.pojo.UserLocationInfo;
 import com.strandls.user.pojo.requests.UserDetails;
 import com.strandls.user.pojo.requests.UserEmailPreferences;
 import com.strandls.user.pojo.requests.UserRoles;
@@ -53,6 +61,9 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private FollowDao followDao;
+
+	@Inject
+	private EsServicesApi esService;
 
 	@Inject
 	Channel channel;
@@ -87,18 +98,20 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public User updateProfilePic(HttpServletRequest request, Long userId, String profilePic)
-			throws UnAuthorizedUserException {
+			throws UnAuthorizedUserException, ApiException {
 		userId = validateUserForEdits(request, userId);
 		User user = userDao.findById(userId);
 
 		user.setProfilePic(profilePic);
 
 		user = userDao.update(user);
+		esUserUpdate(user);
 		return user;
 	}
 
 	@Override
-	public User updateUserDetails(HttpServletRequest request, UserDetails inputUser) throws UnAuthorizedUserException {
+	public User updateUserDetails(HttpServletRequest request, UserDetails inputUser)
+			throws UnAuthorizedUserException, ApiException {
 
 		Long inputUserId = validateUserForEdits(request, inputUser.getId());
 		User user = userDao.findById(inputUserId);
@@ -119,12 +132,30 @@ public class UserServiceImpl implements UserService {
 			user.setMobileNumber(inputUser.getMobileNumber());
 		}
 		user = userDao.update(user);
+		esUserUpdate(user);
 		return user;
 	}
 
 	@Override
+	public void esUserUpdate(User user) throws ApiException {
+
+		UserEsMapping userMapping = new UserEsMapping(user.getId(), user.getName(), user.getProfilePic(),
+				user.getInstitution(), user.getLastLoginDate(), user.getOccupation(), user.getAccountLocked(),
+				user.getLanguageId(), user.getSendDigest(), user.getAccountExpired(), user.getLocation(),
+				user.getDateCreated(), user.getMobileNumber(), user.getIdentificationMail(), user.getSexType(),
+				user.getSendPushNotification(), user.getUserName(), user.getAboutMe(), user.getHideEmial(),
+				user.getEmail());
+		Location location = new Location(user.getLatitude(), user.getLongitude());
+		UserLocationInfo locationInformation = new UserLocationInfo(user.getLocation(), location);
+		Map<String, Object> doc = new HashMap<String, Object>();
+		doc.put("user", userMapping);
+		doc.put("locationInformation",locationInformation);
+		esService.update(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(), user.getId().toString(), doc);
+	}
+
+	@Override
 	public User updateEmailPreferences(HttpServletRequest request, UserEmailPreferences inputUser)
-			throws UnAuthorizedUserException {
+			throws UnAuthorizedUserException, ApiException {
 
 		Long inputUserId = validateUserForEdits(request, inputUser.getId());
 		User user = userDao.findById(inputUserId);
@@ -134,13 +165,13 @@ public class UserServiceImpl implements UserService {
 		user.setHideEmial(inputUser.getHideEmial());
 		user.setSendDigest(inputUser.getSendDigest());
 		user = userDao.update(user);
-
+		esUserUpdate(user);
 		return user;
 	}
 
 	@Override
 	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser)
-			throws UnAuthorizedUserException {
+			throws UnAuthorizedUserException, ApiException {
 
 		Long inputUserId = validateUserForEdits(request, inputUser.getId());
 		User user = userDao.findById(inputUserId);
@@ -153,9 +184,8 @@ public class UserServiceImpl implements UserService {
 		user.setAccountLocked(inputUser.getAccountLocked());
 		user.setPasswordExpired(inputUser.getPasswordExpired());
 		user.setRoles(inputUser.getRoles());
-
 		user = userDao.update(user);
-
+		esUserUpdate(user);
 		return user;
 	}
 
@@ -310,6 +340,7 @@ public class UserServiceImpl implements UserService {
 			User user = fetchUser(userId);
 			user.setIsDeleted(Boolean.TRUE);
 			updateUser(user);
+			esService.delete(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(), userId.toString());
 			return "deleted";
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
@@ -321,7 +352,7 @@ public class UserServiceImpl implements UserService {
 	public List<User> getAllAdmins() {
 		List<Long> adminIdList = userDao.findRoleAdmin();
 		List<User> result = new ArrayList<User>();
-		for(Long adminId:adminIdList) {
+		for (Long adminId : adminIdList) {
 			result.add(fetchUser(adminId));
 		}
 		return result;
