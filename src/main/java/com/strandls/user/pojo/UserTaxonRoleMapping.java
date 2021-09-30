@@ -1,10 +1,7 @@
 package com.strandls.user.pojo;
 
-public class UserTaxonRoleMapping {
+public class UserTaxonRoleMapping extends RoleMapping {
 
-	private Long userid;
-	private Long roleid;
-	private String role;
 	private Long[] taxonomyids;
 
 	public UserTaxonRoleMapping() {
@@ -19,35 +16,8 @@ public class UserTaxonRoleMapping {
 	 * @param taxonomyids
 	 */
 	public UserTaxonRoleMapping(Long userid, Long roleid, String role, Long[] taxonomyids) {
-		super();
-		this.userid = userid;
-		this.roleid = roleid;
-		this.role = role;
+		super(userid, roleid, role);
 		this.taxonomyids = taxonomyids;
-	}
-
-	public Long getUserid() {
-		return userid;
-	}
-
-	public void setUserid(Long userid) {
-		this.userid = userid;
-	}
-
-	public Long getRoleid() {
-		return roleid;
-	}
-
-	public void setRoleid(Long roleid) {
-		this.roleid = roleid;
-	}
-
-	public String getRole() {
-		return role;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
 	}
 
 	public Long[] getTaxonomyids() {
