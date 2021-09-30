@@ -224,6 +224,7 @@ public class UserListServiceImpl implements UserListService {
 			latch.await();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
+			Thread.currentThread().interrupt();
 		}
 
 		aggregationResponse

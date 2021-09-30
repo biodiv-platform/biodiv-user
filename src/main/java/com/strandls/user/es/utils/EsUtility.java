@@ -33,7 +33,7 @@ public class EsUtility {
 	private Logger logger = LoggerFactory.getLogger(EsUtility.class);
 
 	private List<Object> cSTSOT(String str) {
-		if (str == null || str == "" || str.isEmpty())
+		if (str == null || str.equals("")  || str.isEmpty())
 			return new ArrayList<Object>();
 
 		String[] y = str.split(",");
@@ -198,7 +198,7 @@ public class EsUtility {
 			String createdOnMaxDateValue = null;
 			String createdOnMinDateValue = null;
 			Date date = new Date();
-			SimpleDateFormat out = new SimpleDateFormat("YYYY-MM-dd");
+			SimpleDateFormat out = new SimpleDateFormat("yyyy-MM-dd");
 			try {
 				if (createdOnMinDate != null) {
 					createdOnMinDateValue = createdOnMinDate;
