@@ -12,7 +12,7 @@ public class UserListData {
 
 	private List<UserMappingList> userList;
 	private MapAggregationResponse aggregationData;
-	private long totalCount;
+	private Long totalCount;
 
 	/**
 	 * 
@@ -20,7 +20,7 @@ public class UserListData {
 	 * @param aggregationData
 	 * @param totalCount
 	 */
-	public UserListData(List<UserMappingList> userList, MapAggregationResponse aggregationData, long totalCount) {
+	public UserListData(List<UserMappingList> userList, MapAggregationResponse aggregationData, Long totalCount) {
 		super();
 		this.userList = userList;
 		this.aggregationData = aggregationData;
@@ -51,7 +51,7 @@ public class UserListData {
 		return totalCount;
 	}
 
-	public void setTotalCount(long totalCount) {
+	public void setTotalCount(Long totalCount) {
 		this.totalCount = totalCount;
 	}
 

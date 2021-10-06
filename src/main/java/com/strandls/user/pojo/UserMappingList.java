@@ -1,13 +1,15 @@
 package com.strandls.user.pojo;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserMappingList {
 	private Long id;
 	private User user;
-	private UserUgRoleMapping[] userGroup;
-	private UserTaxonRoleMapping[] taxonomy;
-	private Object locationInformation;
+	private List<UserUgRoleMapping> userGroup;
+	private List<UserTaxonRoleMapping> taxonomy;
+	private UserLocationInfo locationInformation;
 
 	/**
 	 * 
@@ -17,8 +19,8 @@ public class UserMappingList {
 	 * @param taxonomy
 	 * @param locationInformation
 	 */
-	public UserMappingList(Long id, User user, UserUgRoleMapping[] userGroup, UserTaxonRoleMapping[] taxonomy,
-			Object locationInformation) {
+	public UserMappingList(Long id, User user,  List<UserUgRoleMapping> userGroup, List<UserTaxonRoleMapping> taxonomy,
+			UserLocationInfo locationInformation) {
 		super();
 		this.id = id;
 		this.user = user;
@@ -48,27 +50,27 @@ public class UserMappingList {
 	}
 
 	@JsonProperty("userGroup")
-	public UserUgRoleMapping[] getUsergroup() {
+	public List<UserUgRoleMapping> getUsergroup() {
 		return userGroup;
 	}
 
-	public void setUsergroup(UserUgRoleMapping[] userGroup) {
+	public void setUsergroup(List<UserUgRoleMapping> userGroup) {
 		this.userGroup = userGroup;
 	}
 
-	public UserTaxonRoleMapping[] getTaxonomy() {
+	public List<UserTaxonRoleMapping> getTaxonomy() {
 		return taxonomy;
 	}
 
-	public void setTaxonomy(UserTaxonRoleMapping[] taxonomy) {
+	public void setTaxonomy(List<UserTaxonRoleMapping> taxonomy) {
 		this.taxonomy = taxonomy;
 	}
 
-	public Object getLocationInformation() {
+	public UserLocationInfo getLocationInformation() {
 		return locationInformation;
 	}
 
-	public void setLocationInformation(Object locationInformation) {
+	public void setLocationInformation(UserLocationInfo locationInformation) {
 		this.locationInformation = locationInformation;
 	}
 

@@ -1,7 +1,9 @@
 package com.strandls.user.pojo;
 
+import java.util.List;
+
 public class UserUgRoleMapping extends RoleMapping {
-	private Long[] usergroupids;
+	private List<Long> usergroupids;
 
 	/**
 	 * 
@@ -10,7 +12,7 @@ public class UserUgRoleMapping extends RoleMapping {
 	 * @param role
 	 * @param usergroupids
 	 */
-	public UserUgRoleMapping(Long userid, Long roleid, String role, Long[] usergroupids) {
+	public UserUgRoleMapping(Long userid, Long roleid, String role, List<Long> usergroupids) {
 		super(userid, roleid, role);
 		this.usergroupids = usergroupids;
 	}
@@ -19,11 +21,11 @@ public class UserUgRoleMapping extends RoleMapping {
 		super();
 	}
 
-	public Long[] getUsergroupids() {
+	public List<Long> getUsergroupids() {
 		return usergroupids;
 	}
 
-	public void setUsergroupids(Long[] usergroupids) {
+	public void setUsergroupids(List<Long> usergroupids) {
 		this.usergroupids = usergroupids;
 	}
 

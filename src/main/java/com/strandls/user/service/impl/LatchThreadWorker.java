@@ -3,8 +3,6 @@ package com.strandls.user.service.impl;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +27,6 @@ public class LatchThreadWorker extends Thread {
 	private Map<String, AggregationResponse> mapResponse;
 	private CountDownLatch latch;
 	private String geoShapeFilterField;
-
-	@Inject
 	private EsServicesApi esService;
 
 	/**

@@ -80,7 +80,6 @@ public class UserListServiceImpl implements UserListService {
 	private JsonNode removeAdminOnlyField(HttpServletRequest request, JsonNode rootNode) {
 		String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (header == null || !header.startsWith("Bearer ")) {
-
 			JsonNode child = ((ObjectNode) rootNode).get("user");
 			((ObjectNode) child).replace("email", null);
 			((ObjectNode) child).replace("userName", null);
@@ -89,10 +88,8 @@ public class UserListServiceImpl implements UserListService {
 			((ObjectNode) child).replace("latitude", null);
 			((ObjectNode) child).replace("longitude", null);
 			((ObjectNode) rootNode).replace("locationInformation", null);
-
 			return rootNode;
 		}
-
 		return rootNode;
 	}
 
