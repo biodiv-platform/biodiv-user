@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNSClient;
+import com.strandls.esmodule.controllers.EsServicesApi;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
@@ -45,6 +46,7 @@ import com.rabbitmq.client.Channel;
 import com.strandls.mail_utility.producer.RabbitMQProducer;
 import com.strandls.user.controller.UserControllerModule;
 import com.strandls.user.dao.UserDaoModule;
+import com.strandls.user.es.utils.EsUtilModule;
 import com.strandls.user.service.impl.UserServiceModule;
 import com.strandls.user.util.PropertyFileUtil;
 import com.strandls.user.util.SNSUtil;
@@ -116,11 +118,11 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				bind(JwtAuthenticator.class).toInstance(jwtAuthenticator);
 
 				bind(SessionFactory.class).toInstance(sessionFactory);
-
+				bind(EsServicesApi.class).in(Scopes.SINGLETON);
 				bind(ServletContainer.class).in(Scopes.SINGLETON);
 				serve("/api/*").with(ServletContainer.class, props);
 			}
-		}, new UserControllerModule(), new UserServiceModule(), new UserDaoModule());
+		}, new UserControllerModule(), new UserServiceModule(), new EsUtilModule(), new UserDaoModule());
 
 		return injector;
 

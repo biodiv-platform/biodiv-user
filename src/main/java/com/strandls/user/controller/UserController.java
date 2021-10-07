@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -30,18 +31,31 @@ import org.slf4j.LoggerFactory;
 
 import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.authentication_utility.util.AuthUtil;
+import com.strandls.esmodule.ApiException;
+import com.strandls.esmodule.pojo.MapBoundParams;
+import com.strandls.esmodule.pojo.MapBounds;
+import com.strandls.esmodule.pojo.MapGeoPoint;
+import com.strandls.esmodule.pojo.MapSearchParams;
+import com.strandls.esmodule.pojo.MapSearchParams.SortTypeEnum;
+import com.strandls.user.pojo.EsLocationListParams;
+import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.user.ApiConstants;
 import com.strandls.user.converter.UserConverter;
+import com.strandls.user.dao.UserDao;
 import com.strandls.user.dto.FirebaseDTO;
+import com.strandls.user.es.utils.EsUtility;
 import com.strandls.user.exception.UnAuthorizedUserException;
 import com.strandls.user.pojo.FirebaseTokens;
 import com.strandls.user.pojo.Follow;
+import com.strandls.user.pojo.MapAggregationResponse;
 import com.strandls.user.pojo.Recipients;
 import com.strandls.user.pojo.User;
 import com.strandls.user.pojo.UserIbp;
+import com.strandls.user.pojo.UserListData;
 import com.strandls.user.pojo.requests.UserDetails;
 import com.strandls.user.pojo.requests.UserEmailPreferences;
 import com.strandls.user.pojo.requests.UserRoles;
+import com.strandls.user.service.UserListService;
 import com.strandls.user.service.UserService;
 import com.strandls.user.util.AuthUtility;
 
@@ -62,6 +76,11 @@ import net.minidev.json.JSONArray;
 @Api("User Service")
 @Path(ApiConstants.V1 + ApiConstants.USER)
 public class UserController {
+
+	@Inject
+	private EsUtility esUtility;
+	@Inject
+	private UserListService userListService;
 
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -126,7 +145,7 @@ public class UserController {
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
 	@ValidateUser
 	public Response updateUserImage(@Context HttpServletRequest request, @QueryParam("id") Long userId,
-			@QueryParam("profilePic") String profilePic) throws UnAuthorizedUserException {
+			@QueryParam("profilePic") String profilePic) throws UnAuthorizedUserException, ApiException {
 		User user = userService.updateProfilePic(request, userId, profilePic);
 		return Response.status(Status.OK).entity(user).build();
 	}
@@ -139,7 +158,7 @@ public class UserController {
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
 	@ValidateUser
 	public Response updateUserDetails(@Context HttpServletRequest request,
-			@ApiParam(name = "user") UserDetails inputUser) throws UnAuthorizedUserException {
+			@ApiParam(name = "user") UserDetails inputUser) throws UnAuthorizedUserException, ApiException {
 		User user = userService.updateUserDetails(request, inputUser);
 		return Response.status(Status.OK).entity(user).build();
 	}
@@ -152,7 +171,7 @@ public class UserController {
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
 	@ValidateUser
 	public Response updateUserEmailPreferences(@Context HttpServletRequest request,
-			@ApiParam(name = "user") UserEmailPreferences inputUser) throws UnAuthorizedUserException {
+			@ApiParam(name = "user") UserEmailPreferences inputUser) throws UnAuthorizedUserException, ApiException {
 		User user = userService.updateEmailPreferences(request, inputUser);
 		return Response.status(Status.OK).entity(user).build();
 	}
@@ -165,7 +184,7 @@ public class UserController {
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
 	@ValidateUser
 	public Response updateUserRoles(@Context HttpServletRequest request, @ApiParam(name = "user") UserRoles inputUser)
-			throws UnAuthorizedUserException {
+			throws UnAuthorizedUserException, ApiException {
 		if (AuthUtility.isAdmin(request)) {
 			Response.status(Status.UNAUTHORIZED).build();
 		}
@@ -435,6 +454,91 @@ public class UserController {
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
+	}
+
+	@POST
+	@Path(ApiConstants.LIST + "/{index}/{type}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response UserList(@Context HttpServletRequest request, @PathParam("index") String index,
+			@PathParam("type") String type, @DefaultValue("10") @QueryParam("max") Integer max,
+			@DefaultValue("0") @QueryParam("offset") Integer offset,
+			@DefaultValue("user.dateCreated") @QueryParam("sort") String sortOn,
+			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
+			@QueryParam("createdOnMinDate") String createdOnMinDate,
+			@QueryParam("lastLoggedInMaxDate") String lastLoggedInMaxDate,
+			@QueryParam("lastLoggedInMinDate") String lastLoggedInMinDate,
+			@DefaultValue("") @QueryParam("user") String user, @QueryParam("left") Double left,
+			@QueryParam("right") Double right, @QueryParam("top") Double top, @QueryParam("bottom") Double bottom,
+			@DefaultValue("") @QueryParam("userGroupList") String userGroupList,
+			@DefaultValue("") @QueryParam("role") String role,
+			@DefaultValue("") @QueryParam("taxonomyList") String taxonomyList,
+			@DefaultValue("") @QueryParam("taxonRole") String taxonRole,
+			@QueryParam("geoAggregationField") String geoAggregationField,
+			@QueryParam("geoShapeFilterField") String geoShapeFilterField,
+			@QueryParam("nestedField") String nestedField, @DefaultValue("") @QueryParam("email") String email,
+			@DefaultValue("") @QueryParam("profession") String profession,
+			@DefaultValue("") @QueryParam("sex") String sex,
+			@DefaultValue("") @QueryParam("institution") String institution,
+			@DefaultValue("") @QueryParam("name") String name,
+			@DefaultValue("") @QueryParam("userName") String userName,
+			@DefaultValue("") @QueryParam("phoneNumber") String phoneNumber,
+			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
+			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
+			@ApiParam(name = "location") EsLocationListParams location) {
+
+		try {
+
+			if (max > 50) {
+				max = 50;
+			}
+
+			MapBounds bounds = null;
+			if (top != null || bottom != null || left != null || right != null) {
+				bounds = new MapBounds();
+				bounds.setBottom(bottom);
+				bounds.setLeft(left);
+				bounds.setRight(right);
+				bounds.setTop(top);
+			}
+
+			MapBoundParams mapBoundsParams = new MapBoundParams();
+			MapSearchParams mapSearchParams = new MapSearchParams();
+			mapSearchParams.setFrom(offset);
+			mapBoundsParams.setBounds(bounds);
+			mapSearchParams.setLimit(max);
+			mapSearchParams.setSortOn(sortOn);
+			mapSearchParams.setSortType(SortTypeEnum.DESC);
+			mapSearchParams.setMapBoundParams(mapBoundsParams);
+
+			String loc = location.getLocation();
+			if (loc != null) {
+				if (loc.contains("/")) {
+					String[] locationArray = loc.split("/");
+					List<List<MapGeoPoint>> multiPolygonPoint = esUtility.multiPolygonGenerator(locationArray);
+					mapBoundsParams.setMultipolygon(multiPolygonPoint);
+				} else {
+					mapBoundsParams.setPolygon(esUtility.polygonGenerator(loc));
+				}
+			}
+
+			MapAggregationResponse aggregationResult = null;
+
+			aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
+					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, geoShapeFilterField, taxonRole, taxonomyList, mapSearchParams);
+
+			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
+					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
+			UserListData result = userListService.getUserListData(request, index, type, geoAggregationField,
+					geoShapeFilterField, nestedField, aggregationResult, mapSearchQuery);
+			return Response.status(Status.OK).entity(result).build();
+
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+
 	}
 
 }
