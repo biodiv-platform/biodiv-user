@@ -36,13 +36,14 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNSClient;
-import com.strandls.esmodule.controllers.EsServicesApi;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.rabbitmq.client.Channel;
+import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.mail_utility.producer.RabbitMQProducer;
 import com.strandls.user.controller.UserControllerModule;
 import com.strandls.user.dao.UserDaoModule;
@@ -95,6 +96,9 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				}
 
 				bind(Channel.class).toInstance(channel);
+
+				ObjectMapper om = new ObjectMapper();
+				bind(ObjectMapper.class).toInstance(om);
 
 //				mail producer binded
 				RabbitMQProducer mailProducer = new RabbitMQProducer(channel);
