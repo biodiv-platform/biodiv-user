@@ -3,6 +3,7 @@
  */
 package com.strandls.user.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,6 +18,8 @@ import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.esmodule.ApiException;
@@ -68,6 +71,9 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private Channel channel;
+
+	@Inject
+	private ObjectMapper om;
 
 	@Override
 	public User fetchUser(Long userId) {
@@ -149,7 +155,14 @@ public class UserServiceImpl implements UserService {
 
 		if (!isUpdate) {
 			MapDocument document = new MapDocument();
-			document.setDocument(userMapping);
+
+			try {
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+				om.setDateFormat(df);
+				document.setDocument(om.writeValueAsString(userMapping));
+			} catch (JsonProcessingException e) {
+				logger.error(e.getMessage());
+			}
 			esService.create(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(), user.getId().toString(), document);
 
 		}
