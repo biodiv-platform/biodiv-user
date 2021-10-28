@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNSClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
@@ -95,6 +96,9 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				}
 
 				bind(Channel.class).toInstance(channel);
+
+				ObjectMapper om = new ObjectMapper();
+				bind(ObjectMapper.class).toInstance(om);
 
 //				mail producer binded
 				RabbitMQProducer mailProducer = new RabbitMQProducer(channel);
