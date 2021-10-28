@@ -3,6 +3,7 @@
  */
 package com.strandls.user.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -152,22 +153,25 @@ public class UserServiceImpl implements UserService {
 				user.getSendPushNotification(), user.getUserName(), user.getAboutMe(), user.getHideEmial(),
 				user.getEmail());
 
+		Location location = new Location(user.getLatitude(), user.getLongitude());
+		UserLocationInfo locationInformation = new UserLocationInfo(user.getLocation(), location);
+		Map<String, Object> doc = new HashMap<String, Object>();
+		doc.put("user", userMapping);
+		doc.put("locationInformation", locationInformation);
+
 		if (!isUpdate) {
 			MapDocument document = new MapDocument();
+
 			try {
-				document.setDocument(om.writeValueAsString(userMapping));
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+				om.setDateFormat(df);
+				document.setDocument(om.writeValueAsString(doc));
 			} catch (JsonProcessingException e) {
 				logger.error(e.getMessage());
 			}
 			esService.create(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(), user.getId().toString(), document);
 
 		}
-
-		Location location = new Location(user.getLatitude(), user.getLongitude());
-		UserLocationInfo locationInformation = new UserLocationInfo(user.getLocation(), location);
-		Map<String, Object> doc = new HashMap<String, Object>();
-		doc.put("user", userMapping);
-		doc.put("locationInformation", locationInformation);
 		esService.update(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(), user.getId().toString(), doc);
 	}
 

@@ -295,6 +295,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				user.setRoles(roleService.setDefaultRoles(AuthUtility.getDefaultRoles()));
 				user = userDao.update(user);
 
+				userService.esUserUpdate(user, true);
 				CommonProfile profile = AuthUtility.createUserProfile(user);
 				result = this.buildTokens(profile, user, true);
 				result.put(Constants.STATUS, true);
