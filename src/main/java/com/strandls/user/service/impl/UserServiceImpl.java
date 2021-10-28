@@ -17,10 +17,13 @@ import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.esmodule.ApiException;
 import com.strandls.esmodule.controllers.EsServicesApi;
+import com.strandls.esmodule.pojo.MapDocument;
 import com.strandls.user.Constants;
 import com.strandls.user.dao.FirebaseDao;
 import com.strandls.user.dao.FollowDao;
@@ -66,7 +69,10 @@ public class UserServiceImpl implements UserService {
 	private EsServicesApi esService;
 
 	@Inject
-	Channel channel;
+	private Channel channel;
+
+	@Inject
+	private ObjectMapper om;
 
 	@Override
 	public User fetchUser(Long userId) {
@@ -105,7 +111,7 @@ public class UserServiceImpl implements UserService {
 		user.setProfilePic(profilePic);
 
 		user = userDao.update(user);
-		esUserUpdate(user);
+		esUserUpdate(user, true);
 		return user;
 	}
 
@@ -132,12 +138,12 @@ public class UserServiceImpl implements UserService {
 			user.setMobileNumber(inputUser.getMobileNumber());
 		}
 		user = userDao.update(user);
-		esUserUpdate(user);
+		esUserUpdate(user, true);
 		return user;
 	}
 
 	@Override
-	public void esUserUpdate(User user) throws ApiException {
+	public void esUserUpdate(User user, Boolean isUpdate) throws ApiException {
 
 		UserEsMapping userMapping = new UserEsMapping(user.getId(), user.getName(), user.getProfilePic(),
 				user.getInstitution(), user.getLastLoginDate(), user.getOccupation(), user.getAccountLocked(),
@@ -145,11 +151,23 @@ public class UserServiceImpl implements UserService {
 				user.getDateCreated(), user.getMobileNumber(), user.getIdentificationMail(), user.getSexType(),
 				user.getSendPushNotification(), user.getUserName(), user.getAboutMe(), user.getHideEmial(),
 				user.getEmail());
+
+		if (!isUpdate) {
+			MapDocument document = new MapDocument();
+			try {
+				document.setDocument(om.writeValueAsString(userMapping));
+			} catch (JsonProcessingException e) {
+				logger.error(e.getMessage());
+			}
+			esService.create(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(), user.getId().toString(), document);
+
+		}
+
 		Location location = new Location(user.getLatitude(), user.getLongitude());
 		UserLocationInfo locationInformation = new UserLocationInfo(user.getLocation(), location);
 		Map<String, Object> doc = new HashMap<String, Object>();
 		doc.put("user", userMapping);
-		doc.put("locationInformation",locationInformation);
+		doc.put("locationInformation", locationInformation);
 		esService.update(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(), user.getId().toString(), doc);
 	}
 
@@ -165,7 +183,7 @@ public class UserServiceImpl implements UserService {
 		user.setHideEmial(inputUser.getHideEmial());
 		user.setSendDigest(inputUser.getSendDigest());
 		user = userDao.update(user);
-		esUserUpdate(user);
+		esUserUpdate(user, true);
 		return user;
 	}
 
@@ -185,7 +203,7 @@ public class UserServiceImpl implements UserService {
 		user.setPasswordExpired(inputUser.getPasswordExpired());
 		user.setRoles(inputUser.getRoles());
 		user = userDao.update(user);
-		esUserUpdate(user);
+		esUserUpdate(user, true);
 		return user;
 	}
 
