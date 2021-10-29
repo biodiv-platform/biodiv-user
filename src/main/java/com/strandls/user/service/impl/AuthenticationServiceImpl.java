@@ -426,7 +426,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				verification = verificationService.saveOtp(user.getId(), otp, verification.getVerificationType(),
 						verificationId, VERIFICATION_ACTIONS.FORGOT_PASSWORD.toString());
 			} else {
-				verification.setNoOfAttempts(attempts > 4 ? 0 : attempts);
+				verification.setNoOfAttempts(attempts > 5 ? 0 : attempts);
 				verification = verificationService.updateOtp(verification);
 			}
 			if (verification == null)
