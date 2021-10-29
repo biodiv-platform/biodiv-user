@@ -481,6 +481,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 					user.setRoles(roleService.setDefaultRoles(AuthUtility.getDefaultRoles()));
 				}
 				userService.updateUser(user);
+				userService.esUserUpdate(user, false);
 				verificationService.deleteOtp(verification.getId());
 				data.put(Constants.STATUS, true);
 				data.put(Constants.MESSAGE, SUCCESS_CONSTANTS.PASSWORD_UPDATED.toString());
