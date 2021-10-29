@@ -328,6 +328,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				return data;
 			}
 			UserVerification verification = verificationService.getUserVerificationDetails(id, act);
+			if (verification == null) {
+				User user = userDao.findById(id);
+				String otp = AppUtil.generateOTP();
+				if (!user.getEmail().isEmpty()) {
+					verification = verificationService.saveOtp(user.getId(), otp, VERIFICATION_TYPE.EMAIL.toString(),
+							user.getEmail(), VERIFICATION_ACTIONS.USER_REGISTRATION.toString());
+				} else {
+					verification = verificationService.saveOtp(user.getId(), otp, VERIFICATION_TYPE.MOBILE.toString(),
+							user.getMobileNumber(), VERIFICATION_ACTIONS.USER_REGISTRATION.toString());
+				}
+			}
 			Integer attempts = verification.getNoOfAttempts();
 			if (++attempts > 2 && Hours.hoursBetween(new DateTime(verification.getDate()), new DateTime(new Date()))
 					.isLessThan(Hours.hours(24))) {
@@ -465,6 +476,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				}
 				MessageDigestPasswordEncoder passwordEncoder = new MessageDigestPasswordEncoder("MD5");
 				user.setPassword(passwordEncoder.encodePassword(password, null));
+				if (user.getAccountLocked()) {
+					user.setAccountLocked(false);
+					user.setRoles(roleService.setDefaultRoles(AuthUtility.getDefaultRoles()));
+				}
 				userService.updateUser(user);
 				verificationService.deleteOtp(verification.getId());
 				data.put(Constants.STATUS, true);
