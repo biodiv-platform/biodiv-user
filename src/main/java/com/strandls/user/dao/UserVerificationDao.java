@@ -15,7 +15,7 @@ import com.strandls.user.util.AbstractDAO;
 
 public class UserVerificationDao extends AbstractDAO<UserVerification, Long> {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserVerificationDao.class);
 
 	/**
 	 * @param sessionFactory
