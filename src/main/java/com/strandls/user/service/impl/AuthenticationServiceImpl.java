@@ -340,7 +340,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				}
 			}
 			Integer attempts = verification.getNoOfAttempts();
-			if (++attempts > 2 && Hours.hoursBetween(new DateTime(verification.getDate()), new DateTime(new Date()))
+			if (++attempts > 4 && Hours.hoursBetween(new DateTime(verification.getDate()), new DateTime(new Date()))
 					.isLessThan(Hours.hours(24))) {
 				data.put(Constants.STATUS, false);
 				data.put(Constants.MESSAGE, ERROR_CONSTANTS.OTP_ATTEMPTS_EXCEEDED.toString());
@@ -351,7 +351,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			String verificationId = verification.getVerificationId();
 			verification.setOtp(otp);
 			verification.setDate(new Date());
-			verification.setNoOfAttempts(attempts > 2 ? 0 : attempts);
+			verification.setNoOfAttempts(attempts > 4 ? 0 : attempts);
 
 			verificationService.updateOtp(verification);
 			User user = userService.fetchUser(id);
@@ -387,7 +387,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				verification = new UserVerification();
 			}
 			Integer attempts = verification.getNoOfAttempts() != null ? verification.getNoOfAttempts() : 0;
-			if (++attempts > 3 && Hours.hoursBetween(new DateTime(verification.getDate()), new DateTime(new Date()))
+			if (++attempts > 4 && Hours.hoursBetween(new DateTime(verification.getDate()), new DateTime(new Date()))
 					.isLessThan(Hours.hours(24))) {
 				data.put(Constants.STATUS, false);
 				data.put(Constants.MESSAGE, ERROR_CONSTANTS.OTP_ATTEMPTS_EXCEEDED.toString());
@@ -426,7 +426,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				verification = verificationService.saveOtp(user.getId(), otp, verification.getVerificationType(),
 						verificationId, VERIFICATION_ACTIONS.FORGOT_PASSWORD.toString());
 			} else {
-				verification.setNoOfAttempts(attempts > 3 ? 0 : attempts);
+				verification.setNoOfAttempts(attempts > 5 ? 0 : attempts);
 				verification = verificationService.updateOtp(verification);
 			}
 			if (verification == null)
