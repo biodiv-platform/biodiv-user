@@ -12,7 +12,6 @@ public class UserEsMapping {
 	private String occupation;
 	private Boolean accountLocked;
 	private Long languageId;
-	private Boolean sendDigest;
 	private Boolean accountExpired;
 	private String location;
 	private Date dateCreated;
@@ -29,9 +28,30 @@ public class UserEsMapping {
 		super();
 	}
 
+	/**
+	 * @param id
+	 * @param name
+	 * @param profilePic
+	 * @param institution
+	 * @param lastLoginDate
+	 * @param occupation
+	 * @param accountLocked
+	 * @param languageId
+	 * @param accountExpired
+	 * @param location
+	 * @param dateCreated
+	 * @param mobileNumber
+	 * @param allowEmailNotification
+	 * @param sexType
+	 * @param sendPushNotification
+	 * @param userName
+	 * @param aboutMe
+	 * @param hideEmial
+	 * @param email
+	 */
 	public UserEsMapping(Long id, String name, String profilePic, String institution, Date lastLoginDate,
-			String occupation, Boolean accountLocked, Long languageId, Boolean sendDigest, Boolean accountExpired,
-			String location, Date dateCreated, String mobileNumber, Boolean allowEmailNotification, String sexType,
+			String occupation, Boolean accountLocked, Long languageId, Boolean accountExpired, String location,
+			Date dateCreated, String mobileNumber, Boolean allowEmailNotification, String sexType,
 			Boolean sendPushNotification, String userName, String aboutMe, Boolean hideEmial, String email) {
 		super();
 		this.id = id;
@@ -42,7 +62,6 @@ public class UserEsMapping {
 		this.occupation = occupation;
 		this.accountLocked = accountLocked;
 		this.languageId = languageId;
-		this.sendDigest = sendDigest;
 		this.accountExpired = accountExpired;
 		this.location = location;
 		this.dateCreated = dateCreated;
@@ -118,14 +137,6 @@ public class UserEsMapping {
 
 	public void setLanguageId(Long languageId) {
 		this.languageId = languageId;
-	}
-
-	public Boolean getSendDigest() {
-		return sendDigest;
-	}
-
-	public void setSendDigest(Boolean sendDigest) {
-		this.sendDigest = sendDigest;
 	}
 
 	public Boolean getAccountExpired() {

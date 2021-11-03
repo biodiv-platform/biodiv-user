@@ -205,7 +205,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		user.setHideEmial(true);
 		user.setEnabled(true);
 		user.setAccountExpired(false);
-		user.setSendDigest(true);
 		user.setAccountLocked(true);
 		user.setPasswordExpired(false);
 		user.setTimezone(0F);
@@ -217,7 +216,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			Language language = languageService.getLanguageByTwoLetterCode(locale.getLanguage());
 			user.setLanguageId(language.getId());
 
-			user.setVersion(0L);
 			User existingUser = null;
 			String verificationType = AppUtil.getVerificationType(userDTO.getVerificationType());
 			switch (verificationType) {

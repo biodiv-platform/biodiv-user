@@ -12,7 +12,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.CriteriaSpecification;
-import org.hibernate.query.Query;
 
 public abstract class AbstractDAO<T, K extends Serializable> {
 
