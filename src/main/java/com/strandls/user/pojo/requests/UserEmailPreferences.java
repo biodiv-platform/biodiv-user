@@ -1,27 +1,34 @@
 package com.strandls.user.pojo.requests;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserEmailPreferences {
 
 	private Long id;
 	private Boolean hideEmial;
 	private Boolean sendNotification;
 	private Boolean identificationMail;
-	private Boolean sendDigest;
 	private Boolean sendPushNotification;
 
 	public UserEmailPreferences() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * @param id
+	 * @param hideEmial
+	 * @param sendNotification
+	 * @param identificationMail
+	 * @param sendPushNotification
+	 */
 	public UserEmailPreferences(Long id, Boolean hideEmial, Boolean sendNotification, Boolean identificationMail,
-			Boolean sendDigest, Boolean sendPushNotification) {
+			Boolean sendPushNotification) {
 		super();
 		this.id = id;
 		this.hideEmial = hideEmial;
 		this.sendNotification = sendNotification;
 		this.identificationMail = identificationMail;
-		this.sendDigest = sendDigest;
 		this.sendPushNotification = sendPushNotification;
 	}
 
@@ -55,14 +62,6 @@ public class UserEmailPreferences {
 
 	public void setIdentificationMail(Boolean identificationMail) {
 		this.identificationMail = identificationMail;
-	}
-
-	public Boolean getSendDigest() {
-		return sendDigest;
-	}
-
-	public void setSendDigest(Boolean sendDigest) {
-		this.sendDigest = sendDigest;
 	}
 
 	public Boolean getSendPushNotification() {

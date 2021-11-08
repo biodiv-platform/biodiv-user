@@ -24,7 +24,6 @@ public class Follow implements Serializable {
 	private static final long serialVersionUID = 8304116269803899781L;
 
 	private Long id;
-	private Long version;
 	private Long objectId;
 	private String objectType;
 	private Long authorId;
@@ -39,16 +38,14 @@ public class Follow implements Serializable {
 
 	/**
 	 * @param id
-	 * @param version
 	 * @param objectId
 	 * @param objectType
 	 * @param authorId
 	 * @param createdOn
 	 */
-	public Follow(Long id, Long version, Long objectId, String objectType, Long authorId, Date createdOn) {
+	public Follow(Long id, Long objectId, String objectType, Long authorId, Date createdOn) {
 		super();
 		this.id = id;
-		this.version = version;
 		this.objectId = objectId;
 		this.objectType = objectType;
 		this.authorId = authorId;
@@ -64,15 +61,6 @@ public class Follow implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	@Column(name = "version")
-	public Long getVersion() {
-		return version;
-	}
-
-	public void setVersion(Long version) {
-		this.version = version;
 	}
 
 	@Column(name = "object_id")

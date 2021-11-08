@@ -148,10 +148,9 @@ public class UserServiceImpl implements UserService {
 
 		UserEsMapping userMapping = new UserEsMapping(user.getId(), user.getName(), user.getProfilePic(),
 				user.getInstitution(), user.getLastLoginDate(), user.getOccupation(), user.getAccountLocked(),
-				user.getLanguageId(), user.getSendDigest(), user.getAccountExpired(), user.getLocation(),
-				user.getDateCreated(), user.getMobileNumber(), user.getIdentificationMail(), user.getSexType(),
-				user.getSendPushNotification(), user.getUserName(), user.getAboutMe(), user.getHideEmial(),
-				user.getEmail());
+				user.getLanguageId(), user.getAccountExpired(), user.getLocation(), user.getDateCreated(),
+				user.getMobileNumber(), user.getIdentificationMail(), user.getSexType(), user.getSendPushNotification(),
+				user.getUserName(), user.getAboutMe(), user.getHideEmial(), user.getEmail());
 
 		Location location = new Location(user.getLatitude(), user.getLongitude());
 		UserLocationInfo locationInformation = new UserLocationInfo(user.getLocation(), location);
@@ -185,7 +184,6 @@ public class UserServiceImpl implements UserService {
 		user.setIdentificationMail(inputUser.getIdentificationMail());
 		user.setSendNotification(inputUser.getSendNotification());
 		user.setHideEmial(inputUser.getHideEmial());
-		user.setSendDigest(inputUser.getSendDigest());
 		user = userDao.update(user);
 		esUserUpdate(user, true);
 		return user;
@@ -290,7 +288,7 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.SPECIES_SPECIES;
 		Follow follow = followDao.findByObject(objectType, objectId, userId);
 		if (follow == null) {
-			follow = new Follow(null, 0L, objectId, objectType, userId, new Date());
+			follow = new Follow(null, objectId, objectType, userId, new Date());
 			follow = followDao.save(follow);
 
 		}
