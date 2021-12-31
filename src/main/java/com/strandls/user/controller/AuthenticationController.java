@@ -125,7 +125,8 @@ public class AuthenticationController {
 			boolean status = Boolean.parseBoolean(tokens.get(Constants.STATUS).toString());
 			boolean verification = Boolean.parseBoolean(tokens.get("verificationRequired").toString());
 			ResponseBuilder response = Response.ok().entity(tokens);
-			if (status && !verification) {
+			String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
+			if (status && !verification && noCookie.equals("0")) {
 				NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, tokens.get(Constants.ACCESS_TOKEN).toString(),
 						"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60,false);//NOSONAR
 				NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN,
@@ -158,10 +159,15 @@ public class AuthenticationController {
 			// tokens
 			Map<String, Object> tokens = this.authenticationService.buildTokens(profile,
 					this.userService.fetchUser(Long.parseLong(profile.getId())), true);
-			return Response.status(Status.OK)
+
+			String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
+			if(noCookie.equals("0")) {
+				return Response.status(Status.OK)
 					.cookie(new NewCookie(Constants.BA_TOKEN, tokens.get(Constants.ACCESS_TOKEN).toString()))
 					.cookie(new NewCookie(Constants.BR_TOKEN, tokens.get(Constants.REFRESH_TOKEN).toString()))
 					.entity(tokens).build();
+			}
+			return Response.status(Status.OK).entity(tokens).build();
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
 			return Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();
@@ -274,7 +280,8 @@ public class AuthenticationController {
 			return Response.status(Status.BAD_REQUEST).entity("OTP Cannot be empty").build();
 		}
 		Map<String, Object> result = authenticationService.validateUser(request, id, otp);
-		if (Boolean.parseBoolean(result.get(Constants.STATUS).toString())) {
+		String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
+		if (Boolean.parseBoolean(result.get(Constants.STATUS).toString()) && noCookie.equals("0")) {
 			NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, result.get(Constants.ACCESS_TOKEN).toString(),
 					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);//NOSONAR
 			NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN, result.get(Constants.REFRESH_TOKEN).toString(),
