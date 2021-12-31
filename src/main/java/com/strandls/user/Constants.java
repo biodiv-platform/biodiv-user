@@ -12,6 +12,7 @@ public class Constants {
 	public static final String BA_TOKEN = "BAToken";
 	public static final String BR_TOKEN = "BRToken";
 	public static final String REFRESH_TOKEN = "refresh_token";
+	public static final String NO_COOKIE = "no_cookie";
 
 	public static final String OBSERVATION = "observation";
 	public static final String SPECIES_PARTICIPATION_OBSERVATION = "species.participation.Observation";
