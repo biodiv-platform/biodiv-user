@@ -132,6 +132,10 @@ public class AppUtil {
 		if (tmpDomain != null && !tmpDomain.isEmpty() && tmpDomain.contains(".")) {
 			domain = InternetDomainName.from(tmpDomain).topDomainUnderRegistrySuffix().toString();
 		}
+		String multiCookie = PropertyFileUtil.fetchProperty("config.properties", "multi_cookie");
+		if ("1".equals(multiCookie) && domain.startsWith(".")) {
+			domain = domain.substring(1);
+		}
 		return domain;
 	}
 
