@@ -1,7 +1,7 @@
 package com.strandls.user.es.utils;
 
 public enum UserIndex {
-	INDEX("extended_user"), TYPE("_doc"), EMAIL_KEYWORD("user.email.keyword"),
+	INDEX("extended_user"), TYPE("_doc"), EMAIL_KEYWORD("user.email.keyword"), NAME("user.name"),
 	USERNAME_KEYWORD("user.userName.keyword"), PHONE("user.mobileNumber"),
 	INSTITUTION_KEYWORD("user.institution.keyword"), SEX_KEYWORD("user.sexType.keyword"),
 	OCCUPATION_KEYWORD("user.occupation.keyword"), CREATEDON("user.dateCreated"),
