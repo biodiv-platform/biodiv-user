@@ -162,6 +162,11 @@ public class EsUtility {
 			if (!userId.isEmpty()) {
 				boolAndLists.add(assignBoolAndQuery(UserIndex.USER.getValue(), userId, null));
 			}
+//			name
+			List<Object> nameList = cSTSOT(name);
+			if (!nameList.isEmpty()) {
+				boolAndLists.add(assignBoolAndQuery(UserIndex.NAME.getValue(), nameList, null));
+			}
 //			Occupation
 			List<Object> occupation = cSTSOT(profession);
 			if (!occupation.isEmpty()) {
