@@ -33,7 +33,7 @@ public class EsUtility {
 	private Logger logger = LoggerFactory.getLogger(EsUtility.class);
 
 	private List<Object> cSTSOT(String str) {
-		if (str == null || str.equals("")  || str.isEmpty())
+		if (str == null || str.equals("") || str.isEmpty())
 			return new ArrayList<Object>();
 
 		String[] y = str.split(",");
@@ -165,7 +165,9 @@ public class EsUtility {
 //			name
 			List<Object> nameList = cSTSOT(name);
 			if (!nameList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(UserIndex.NAME.getValue(), nameList, null));
+				for (Object usr : nameList) {
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(UserIndex.NAME.getValue(), usr.toString(), null));
+				}
 			}
 //			Occupation
 			List<Object> occupation = cSTSOT(profession);
