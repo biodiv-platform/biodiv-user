@@ -60,6 +60,7 @@ public class ApiConstants {
 	public static final String SEND_NOTIFICATION = "/send-notification";
 
 	public static final String UPDATE = "/update";
+	public static final String UNSUBSCRIBE = "/unsubscribe";
 	public static final String IMAGE = "/image";
 	public static final String DETAILS = "/details";
 	public static final String EMAIL_PREFERENCES = "/emailPreferences";
@@ -71,6 +72,8 @@ public class ApiConstants {
 	public static final String DOWNLOADLOG = "/downloadLog";
 	public static final String LIST = "/list";
 	public static final String CREATE = "/create";
+
+	public static final String EMAIL = "/email";
 
 	
 	

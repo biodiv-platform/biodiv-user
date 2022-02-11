@@ -190,6 +190,22 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public User unsubscribeByUserEmail(String email) throws Exception {
+
+		User user = userDao.findByUserEmail(email);
+
+		if (user == null) {
+			throw new Exception("User not found");
+		} else if (Boolean.FALSE.equals(user.getSendNotification())) {
+			throw new Exception("User Already unsubscribed");
+		}
+
+		user = userDao.update(user);
+		esUserUpdate(user, true);
+		return user;
+	}
+
+	@Override
 	public User updateRolesAndPermission(HttpServletRequest request, UserRoles inputUser)
 			throws UnAuthorizedUserException, ApiException {
 

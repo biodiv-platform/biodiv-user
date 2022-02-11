@@ -116,6 +116,11 @@ public class AuthUtility {
 		return obj;
 	}
 
+	public static String getUserEmail(String token) {
+		CommonProfile profile = AuthUtil.getProfileFromToken(token);
+		return profile == null ? profile.getEmail() : null;
+	}
+
 	public static String[] getDefaultRoles() {
 		String[] roleNames = PropertyFileUtil.fetchProperty(CONFIG, "user.defaultRoleNames").split(",");
 		return roleNames;
