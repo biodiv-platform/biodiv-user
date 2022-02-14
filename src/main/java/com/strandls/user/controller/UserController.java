@@ -176,7 +176,7 @@ public class UserController {
 	}
 
 	@GET
-	@Path(ApiConstants.UNSUBSCRIBE + ApiConstants.EMAIL + "/{token}")
+	@Path(ApiConstants.UNSUBSCRIBE + "/{token}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(value = "unsubscriber user mail notification", notes = "Returns User details", response = User.class)
@@ -187,7 +187,7 @@ public class UserController {
 
 		User user = null;
 		if (token == null || token.contentEquals("x")) {
-			Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		String email = AuthUtility.getUserEmail(token);

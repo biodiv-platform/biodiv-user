@@ -118,7 +118,7 @@ public class AuthUtility {
 
 	public static String getUserEmail(String token) {
 		CommonProfile profile = AuthUtil.getProfileFromToken(token);
-		return profile == null ? profile.getEmail() : null;
+		return profile != null && profile.getEmail() != null  ? profile.getEmail() : null;
 	}
 
 	public static String[] getDefaultRoles() {
