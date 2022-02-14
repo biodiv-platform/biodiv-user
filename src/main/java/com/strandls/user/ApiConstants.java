@@ -73,8 +73,6 @@ public class ApiConstants {
 	public static final String LIST = "/list";
 	public static final String CREATE = "/create";
 
-	public static final String EMAIL = "/email";
-
 	
 	
 
