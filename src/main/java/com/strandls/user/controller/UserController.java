@@ -192,7 +192,7 @@ public class UserController {
 
 		String email = AuthUtility.getUserEmail(token);
 		if (email == null || email.isEmpty()) {
-			return Response.status(Status.OK).entity("Provided token is invalid").build();
+			return Response.status(Status.BAD_REQUEST).entity("Provided token is invalid").build();
 		}
 
 		try {
