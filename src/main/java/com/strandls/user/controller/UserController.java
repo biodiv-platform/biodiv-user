@@ -187,7 +187,7 @@ public class UserController {
 
 		User user = null;
 		if (token == null || token.contentEquals("x")) {
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.UNAUTHORIZED).entity("Unauthorized").build();
 		}
 
 		String email = AuthUtility.getUserEmail(token);
