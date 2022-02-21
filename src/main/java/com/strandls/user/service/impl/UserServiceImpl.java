@@ -193,13 +193,14 @@ public class UserServiceImpl implements UserService {
 	public User unsubscribeByUserEmail(String email) throws Exception {
 
 		User user = userDao.findByUserEmail(email);
+		
 
 		if (user == null) {
 			throw new Exception("User not found");
 		} else if (Boolean.FALSE.equals(user.getSendNotification())) {
 			throw new Exception("User Already unsubscribed");
 		}
-
+		user.setSendNotification(false);
 		user = userDao.update(user);
 		esUserUpdate(user, true);
 		return user;
