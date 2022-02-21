@@ -198,10 +198,10 @@ public class UserController {
 		try {
 			user = userService.unsubscribeByUserEmail(email);
 		} catch (Exception e) {
-			return Response.status(Status.OK).entity(e.getMessage()).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 
-		return Response.status(Status.OK).entity(user).build();
+		return Response.status(Status.OK).entity("Unsubscribed").build();
 	}
 
 	@PUT
