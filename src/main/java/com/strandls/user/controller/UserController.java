@@ -136,6 +136,22 @@ public class UserController {
 		}
 	}
 
+	@POST
+	@Path(ApiConstants.IBP + "/users")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ApiOperation(value = "Find Users by User ID list for ibp", notes = "Returns Users details", response = List.class)
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Empty user list.", response = List.class) })
+
+	public Response getUserIbpInBulk(@ApiParam("userIdList") List<Long> userIdList) {
+		try {
+			return Response.status(Status.OK).entity(userService.fetchUserIbpBulk(userIdList)).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+
 	@PUT
 	@Path(ApiConstants.UPDATE + ApiConstants.IMAGE)
 	@Consumes(MediaType.APPLICATION_JSON)
