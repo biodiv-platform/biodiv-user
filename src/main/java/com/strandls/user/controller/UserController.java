@@ -191,6 +191,35 @@ public class UserController {
 		return Response.status(Status.OK).entity(user).build();
 	}
 
+	@GET
+	@Path(ApiConstants.UNSUBSCRIBE + "/{token}")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "unsubscriber user mail notification", notes = "Returns User details", response = User.class)
+	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+
+	public Response updateUserEmailPreferences(@PathParam("token") String token)
+			throws UnAuthorizedUserException, ApiException {
+
+		User user = null;
+		if (token == null || token.contentEquals("x")) {
+			return Response.status(Status.UNAUTHORIZED).entity("Unauthorized").build();
+		}
+
+		String email = AuthUtility.getUserEmail(token);
+		if (email == null || email.isEmpty()) {
+			return Response.status(Status.BAD_REQUEST).entity("Provided token is invalid").build();
+		}
+
+		try {
+			user = userService.unsubscribeByUserEmail(email);
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+
+		return Response.status(Status.OK).entity("Unsubscribed").build();
+	}
+
 	@PUT
 	@Path(ApiConstants.UPDATE + ApiConstants.ROLES)
 	@Consumes(MediaType.APPLICATION_JSON)
