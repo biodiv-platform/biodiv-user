@@ -73,4 +73,6 @@ public interface UserService {
 	public List<User> getAllAdmins();
 
 	public void esUserUpdate(User user, Boolean isUpdate) throws ApiException;
+
+	public User unsubscribeByUserEmail(String email) throws Exception;
 }

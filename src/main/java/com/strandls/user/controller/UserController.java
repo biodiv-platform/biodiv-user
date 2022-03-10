@@ -136,6 +136,22 @@ public class UserController {
 		}
 	}
 
+	@POST
+	@Path(ApiConstants.IBP + "/users")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ApiOperation(value = "Find Users by User ID list for ibp", notes = "Returns Users details", response = List.class)
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Empty user list.", response = List.class) })
+
+	public Response getUserIbpInBulk(@ApiParam("userIdList") List<Long> userIdList) {
+		try {
+			return Response.status(Status.OK).entity(userService.fetchUserIbpBulk(userIdList)).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+
 	@PUT
 	@Path(ApiConstants.UPDATE + ApiConstants.IMAGE)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -173,6 +189,35 @@ public class UserController {
 			@ApiParam(name = "user") UserEmailPreferences inputUser) throws UnAuthorizedUserException, ApiException {
 		User user = userService.updateEmailPreferences(request, inputUser);
 		return Response.status(Status.OK).entity(user).build();
+	}
+
+	@GET
+	@Path(ApiConstants.UNSUBSCRIBE + "/{token}")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "unsubscriber user mail notification", notes = "Returns User details", response = User.class)
+	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+
+	public Response updateUserEmailPreferences(@PathParam("token") String token)
+			throws UnAuthorizedUserException, ApiException {
+
+		User user = null;
+		if (token == null || token.contentEquals("x")) {
+			return Response.status(Status.UNAUTHORIZED).entity("Unauthorized").build();
+		}
+
+		String email = AuthUtility.getUserEmail(token);
+		if (email == null || email.isEmpty()) {
+			return Response.status(Status.BAD_REQUEST).entity("Provided token is invalid").build();
+		}
+
+		try {
+			user = userService.unsubscribeByUserEmail(email);
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+
+		return Response.status(Status.OK).entity("Unsubscribed").build();
 	}
 
 	@PUT
