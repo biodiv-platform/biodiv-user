@@ -209,7 +209,7 @@ public class AuthenticationController {
 			String location = userDTO.getLocation();
 			Double latitude = userDTO.getLatitude();
 			Double longitude = userDTO.getLongitude();
-			String email = userDTO.getEmail();
+			String email = userDTO.getEmail().toLowerCase();
 			String mobileNumber = userDTO.getMobileNumber();
 			String verificationType = AppUtil.getVerificationType(userDTO.getVerificationType());
 			String mode = userDTO.getMode();
