@@ -224,16 +224,22 @@ public class UserListServiceImpl implements UserListService {
 			Thread.currentThread().interrupt();
 		}
 
-		aggregationResponse
-				.setProfession(mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()).getGroupAggregation());
-		aggregationResponse
-				.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation());
-		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD_NESTED.getValue()).getGroupAggregation());
+		aggregationResponse.setProfession(mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()) != null
+				? mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()).getGroupAggregation()
+				: null);
+		aggregationResponse.setInstitution(mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()) != null
+				? mapAggResponse.get(UserIndex.INSTITUTION_KEYWORD.getValue()).getGroupAggregation()
+				: null);
+		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD_NESTED.getValue()) != null
+				? mapAggResponse.get(UserIndex.ROLE_KEYWORD_NESTED.getValue()).getGroupAggregation()
+				: null);
 		aggregationResponse.setSex(mapAggResponse.get(UserIndex.SEX_KEYWORD.getValue()).getGroupAggregation());
-		aggregationResponse
-				.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()).getGroupAggregation());
-		aggregationResponse
-				.setTaxonomyRole(mapAggResponse.get(UserIndex.TAXON_ROLE_NESTED.getValue()).getGroupAggregation());
+		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()) != null
+				? mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()).getGroupAggregation()
+				: null);
+		aggregationResponse.setTaxonomyRole(mapAggResponse.get(UserIndex.TAXON_ROLE_NESTED.getValue()) != null
+				? mapAggResponse.get(UserIndex.TAXON_ROLE_NESTED.getValue()).getGroupAggregation()
+				: null);
 
 		return aggregationResponse;
 	}
