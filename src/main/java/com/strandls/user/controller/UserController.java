@@ -152,7 +152,7 @@ public class UserController {
 		}
 	}
 
-	@GET
+	@POST
 	@Path(ApiConstants.IBP + "/userList")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -160,7 +160,7 @@ public class UserController {
 	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
 	
-	public Response getUserBulk(@QueryParam("userIds") String userIds) {
+	public Response getUserBulk(@ApiParam("userIds") String userIds) {
 
 		try {
 
