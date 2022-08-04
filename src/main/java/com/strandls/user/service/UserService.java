@@ -29,6 +29,9 @@ public interface UserService {
 	public UserIbp fetchUserIbp(Long userId);
 
 	public List<UserIbp> fetchUserIbpBulk(List<Long> userIds);
+	
+	public List<User> fetchUserBulk(List<Long> userIds);
+
 
 	public User getUserByEmailOrMobile(String data);
 
