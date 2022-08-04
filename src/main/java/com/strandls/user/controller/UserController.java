@@ -152,13 +152,14 @@ public class UserController {
 		}
 	}
 
-	@POST
+	@GET
 	@Path(ApiConstants.IBP + "/userList")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 
 	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+	
 	public Response getUserBulk(@QueryParam("userIds") String userIds) {
 
 		try {
@@ -166,8 +167,8 @@ public class UserController {
 			List<Long> uIds = new ArrayList<>();
 			for (String uId : userIds.split(","))
 				uIds.add(Long.parseLong(uId));
-
-			return Response.status(Status.OK).entity(userService.fetchUserBulk(uIds)).build();
+			List<User> users= userService.fetchUserBulk(uIds);
+			return Response.status(Status.OK).entity(users).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
