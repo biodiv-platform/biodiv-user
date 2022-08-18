@@ -233,7 +233,9 @@ public class UserListServiceImpl implements UserListService {
 		aggregationResponse.setRole(mapAggResponse.get(UserIndex.ROLE_KEYWORD_NESTED.getValue()) != null
 				? mapAggResponse.get(UserIndex.ROLE_KEYWORD_NESTED.getValue()).getGroupAggregation()
 				: null);
-		aggregationResponse.setSex(mapAggResponse.get(UserIndex.SEX_KEYWORD.getValue()).getGroupAggregation());
+		aggregationResponse.setSex(mapAggResponse.get(UserIndex.SEX_KEYWORD.getValue()) != null
+				? mapAggResponse.get(UserIndex.SEX_KEYWORD.getValue()).getGroupAggregation()
+				: null);
 		aggregationResponse.setUserGroup(mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()) != null
 				? mapAggResponse.get(UserIndex.USERGROUPID_NESTED.getValue()).getGroupAggregation()
 				: null);
