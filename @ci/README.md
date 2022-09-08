@@ -17,6 +17,7 @@ export DB_URL="jdbc:postgresql://localhost:5432/database"
 
 export MTPROP_HOST="localhost:8080"
 export MTPROP_SCHEMES="http"
+export ARTIFACTORY_COMPAT=1
 ```
 
 ### Build commands
