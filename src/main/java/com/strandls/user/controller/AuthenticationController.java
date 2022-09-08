@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.strandls.authentication_utility.filter.ValidateUser;
+import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.user.ApiConstants;
 import com.strandls.user.Constants;
 import com.strandls.user.Constants.ERROR_CONSTANTS;
@@ -48,6 +49,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import net.minidev.json.JSONArray;
 
 @Api("Authentication Service")
 @Path(ApiConstants.V1 + ApiConstants.AUTHENTICATE)
@@ -128,10 +130,10 @@ public class AuthenticationController {
 			String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
 			if (status && !verification && noCookie.equals("0")) {
 				NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, tokens.get(Constants.ACCESS_TOKEN).toString(),
-						"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60,false);//NOSONAR
+						"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);// NOSONAR
 				NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN,
 						tokens.get(Constants.REFRESH_TOKEN).toString(), "/", AppUtil.getDomain(request), "",
-						10 * 24 * 60 * 60, false);//NOSONAR
+						10 * 24 * 60 * 60, false);// NOSONAR
 				return response.cookie(accessToken).cookie(refreshToken).build();
 			} else {
 				return response.build();
@@ -161,11 +163,11 @@ public class AuthenticationController {
 					this.userService.fetchUser(Long.parseLong(profile.getId())), true);
 
 			String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
-			if(noCookie.equals("0")) {
+			if (noCookie.equals("0")) {
 				return Response.status(Status.OK)
-					.cookie(new NewCookie(Constants.BA_TOKEN, tokens.get(Constants.ACCESS_TOKEN).toString()))
-					.cookie(new NewCookie(Constants.BR_TOKEN, tokens.get(Constants.REFRESH_TOKEN).toString()))
-					.entity(tokens).build();
+						.cookie(new NewCookie(Constants.BA_TOKEN, tokens.get(Constants.ACCESS_TOKEN).toString()))
+						.cookie(new NewCookie(Constants.BR_TOKEN, tokens.get(Constants.REFRESH_TOKEN).toString()))
+						.entity(tokens).build();
 			}
 			return Response.status(Status.OK).entity(tokens).build();
 		} catch (Exception ex) {
@@ -209,16 +211,20 @@ public class AuthenticationController {
 			String location = userDTO.getLocation();
 			Double latitude = userDTO.getLatitude();
 			Double longitude = userDTO.getLongitude();
-			String email = userDTO.getEmail();
+			String email = userDTO.getEmail().toLowerCase();
 			String mobileNumber = userDTO.getMobileNumber();
 			String verificationType = AppUtil.getVerificationType(userDTO.getVerificationType());
 			String mode = userDTO.getMode();
 			String recaptcha = userDTO.getRecaptcha();
 			GoogleRecaptchaCheck check = new GoogleRecaptchaCheck();
-			if (check.isRobot(recaptcha)) {
+
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			JSONArray roles = (JSONArray) profile.getAttribute("roles");
+			if (!roles.contains("ROLE_ADMIN") && check.isRobot(recaptcha)) {
 				return Response.status(Status.BAD_REQUEST)
 						.entity(AppUtil.generateResponse(false, ERROR_CONSTANTS.INVALID_CAPTCHA)).build();
 			}
+
 			if (username == null || username.isEmpty()) {
 				return Response.status(Status.BAD_REQUEST).entity("Username cannot be empty").build();
 			}
@@ -283,9 +289,9 @@ public class AuthenticationController {
 		String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
 		if (Boolean.parseBoolean(result.get(Constants.STATUS).toString()) && noCookie.equals("0")) {
 			NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, result.get(Constants.ACCESS_TOKEN).toString(),
-					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);//NOSONAR
+					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);// NOSONAR
 			NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN, result.get(Constants.REFRESH_TOKEN).toString(),
-					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);//NOSONAR
+					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);// NOSONAR
 			return Response.ok().entity(result).cookie(accessToken).cookie(refreshToken).build();
 		}
 		return Response.status(Status.OK).entity(result).build();

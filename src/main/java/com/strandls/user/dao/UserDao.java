@@ -56,11 +56,11 @@ public class UserDao extends AbstractDAO<User, Long> {
 	@SuppressWarnings("unchecked")
 	public User findByUserEmail(String email) {
 		Session session = sessionFactory.openSession();
-		String hql = "from User u where u.email = :email";
+		String hql = "from User u where lower(u.email) = :email";
 		User entity = null;
 		try {
 			Query<User> query = session.createQuery(hql);
-			query.setParameter("email", email);
+			query.setParameter("email", email.toLowerCase());
 
 			entity = query.getSingleResult();
 		} catch (Exception e) {
