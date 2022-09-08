@@ -152,6 +152,24 @@ public class UserController {
 		}
 	}
 
+	@POST
+	@Path(ApiConstants.IBP + "/userList")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
+	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+	
+	public Response getUserBulk(@ApiParam("userIds") List<Long> userIdList) {
+
+		try {
+			List<User> users= userService.fetchUserBulk(userIdList);
+			return Response.status(Status.OK).entity(users).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+
 	@PUT
 	@Path(ApiConstants.UPDATE + ApiConstants.IMAGE)
 	@Consumes(MediaType.APPLICATION_JSON)
