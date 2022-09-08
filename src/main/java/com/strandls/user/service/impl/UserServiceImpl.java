@@ -193,7 +193,6 @@ public class UserServiceImpl implements UserService {
 	public User unsubscribeByUserEmail(String email) throws Exception {
 
 		User user = userDao.findByUserEmail(email);
-		
 
 		if (user == null) {
 			throw new Exception("User not found");
@@ -247,6 +246,15 @@ public class UserServiceImpl implements UserService {
 		List<UserIbp> result = new ArrayList<UserIbp>();
 		for (Long userId : userIds) {
 			result.add(fetchUserIbp(userId));
+		}
+		return result;
+	}
+
+	@Override
+	public List<User> fetchUserBulk(List<Long> userIds) {
+		List<User> result = new ArrayList<>();
+		for (Long userId : userIds) {
+			result.add(userDao.findById(userId));
 		}
 		return result;
 	}
