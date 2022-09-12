@@ -218,9 +218,7 @@ public class AuthenticationController {
 			String recaptcha = userDTO.getRecaptcha();
 			GoogleRecaptchaCheck check = new GoogleRecaptchaCheck();
 
-			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
-			JSONArray roles = (JSONArray) profile.getAttribute("roles");
-			if (!roles.contains("ROLE_ADMIN") && check.isRobot(recaptcha)) {
+			if (check.isRobot(recaptcha)) {
 				return Response.status(Status.BAD_REQUEST)
 						.entity(AppUtil.generateResponse(false, ERROR_CONSTANTS.INVALID_CAPTCHA)).build();
 			}
