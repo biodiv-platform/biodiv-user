@@ -404,11 +404,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				return data;
 			}
 
-			System.out.println("--------before otp generation----------");
-			System.out.println();
 			String otp = AppUtil.generateOTP();
-			System.out.println();
-			System.out.println("--------after otp generation---------");
 			verification.setAction(VERIFICATION_ACTIONS.FORGOT_PASSWORD.toString());
 			verification.setDate(new Date());
 			verification.setOtp(otp);
