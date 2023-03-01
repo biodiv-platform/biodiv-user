@@ -98,16 +98,25 @@ public class UserController {
 	@Path("/{userId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
+	@ValidateUser
 	@ApiOperation(value = "Find User by User ID", notes = "Returns User details", response = User.class)
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "Traits not found", response = String.class) })
 
-	public Response getUser(@PathParam("userId") String userId) {
+	public Response getUser(@Context HttpServletRequest request, @PathParam("userId") String userId) {
 
 		try {
 
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long requestorId = Long.parseLong(profile.getId());
+
 			Long uId = Long.parseLong(userId);
 			User user = userService.fetchUser(uId);
+
+			JSONArray roles = (JSONArray) profile.getAttribute("roles");
+
+			if (requestorId == uId || roles.contains("ROLE_ADMIN")) {
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			if (user.getIsDeleted().booleanValue()) {
 				return Response.status(Status.NOT_FOUND).entity("User deleted").build();
 			}
@@ -159,11 +168,11 @@ public class UserController {
 
 	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-	
+
 	public Response getUserBulk(@ApiParam("userIds") List<Long> userIdList) {
 
 		try {
-			List<User> users= userService.fetchUserBulk(userIdList);
+			List<User> users = userService.fetchUserBulk(userIdList);
 			return Response.status(Status.OK).entity(users).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).build();
