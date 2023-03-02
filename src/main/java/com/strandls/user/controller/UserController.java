@@ -21,6 +21,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -98,7 +99,6 @@ public class UserController {
 	@Path("/{userId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ValidateUser
 	@ApiOperation(value = "Find User by User ID", notes = "Returns User details", response = User.class)
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "Traits not found", response = String.class) })
 
@@ -107,24 +107,41 @@ public class UserController {
 
 		try {
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
-
 			Long uId = Long.parseLong(userId);
 			User user = userService.fetchUser(uId);
-			Long requestorId = Long.parseLong(profile.getId());
 
-			if (user.getIsDeleted().booleanValue()) {
-				return Response.status(Status.NOT_FOUND).entity("User deleted").build();
-			}
-
-			if (AuthUtility.isAdmin(request) || requestorId.equals(uId)) {
+			// There is no user logged in
+			String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+			if (header == null || !header.startsWith("Bearer ")) {
+				user.setMobileNumber(null);
+				user.setEmail(null);
 				return Response.status(Status.OK).entity(user).build();
-			} else {
-				return Response.status(Status.UNAUTHORIZED).build();
 			}
+
+			// User is logged in but token is expired or invalid
+			if (profile == null) {
+				user.setMobileNumber(null);
+				user.setEmail(null);
+				return Response.status(Status.OK).entity(user).build();
+			}
+
+			// Check for admin
+			if (AuthUtility.isAdmin(request)) {
+				return Response.status(Status.OK).entity(user).build();
+			}
+
+			// If user profile is not admin and trying to see somebody else profile
+			if (!AuthUtility.isAdmin(request) && !profile.getId().equals(userId)) {
+				user.setEmail(null);
+				user.setMobileNumber(null);
+				return Response.status(Status.OK).entity(user).build();
+			}
+
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return Response.status(Status.NOT_FOUND).build();
 		}
+		return Response.status(Status.BAD_REQUEST).build();
 	}
 
 	@GET
