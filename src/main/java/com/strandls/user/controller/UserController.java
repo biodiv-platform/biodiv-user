@@ -98,20 +98,29 @@ public class UserController {
 	@Path("/{userId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
+	@ValidateUser
 	@ApiOperation(value = "Find User by User ID", notes = "Returns User details", response = User.class)
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "Traits not found", response = String.class) })
 
-	public Response getUser(@PathParam("userId") String userId) {
+	public Response getUser(@Context HttpServletRequest request, @PathParam("userId") String userId)
+			throws UnAuthorizedUserException, ApiException {
 
 		try {
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
 
 			Long uId = Long.parseLong(userId);
 			User user = userService.fetchUser(uId);
+			Long requestorId = Long.parseLong(profile.getId());
+
 			if (user.getIsDeleted().booleanValue()) {
 				return Response.status(Status.NOT_FOUND).entity("User deleted").build();
 			}
-			return Response.status(Status.OK).entity(user).build();
+
+			if (AuthUtility.isAdmin(request) || requestorId.equals(uId)) {
+				return Response.status(Status.OK).entity(user).build();
+			} else {
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return Response.status(Status.NOT_FOUND).build();
@@ -156,14 +165,19 @@ public class UserController {
 	@Path(ApiConstants.IBP + "/userList")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-
+	@ValidateUser
 	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-	
-	public Response getUserBulk(@ApiParam("userIds") List<Long> userIdList) {
+
+	public Response getUserBulk(@Context HttpServletRequest request, @ApiParam("userIds") List<Long> userIdList)
+			throws UnAuthorizedUserException, ApiException {
 
 		try {
-			List<User> users= userService.fetchUserBulk(userIdList);
+
+			if (!AuthUtility.isAdmin(request)) {
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			List<User> users = userService.fetchUserBulk(userIdList);
 			return Response.status(Status.OK).entity(users).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).build();
@@ -505,12 +519,15 @@ public class UserController {
 	@GET
 	@Path(ApiConstants.ADMIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
+	@ValidateUser
 	@ApiOperation(value = "Fetch all the admins of the portal", notes = "Returns a list of admins", response = User.class, responseContainer = "List")
 	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the admins", response = String.class) })
 
-	public Response getAllAdmins() {
+	public Response getAllAdmins(@Context HttpServletRequest request) {
 		try {
+			if (!AuthUtility.isAdmin(request)) {
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			List<User> result = userService.getAllAdmins();
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
