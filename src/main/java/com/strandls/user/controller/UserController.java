@@ -108,19 +108,31 @@ public class UserController {
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
 			Long uId = Long.parseLong(userId);
 			User user = userService.fetchUser(uId);
-			Boolean flag = true;
 
+			// There is no user logged in
 			String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-			if (header == null || !header.startsWith("Bearer ") || profile == null
-					|| (!AuthUtility.isAdmin(request) && !profile.getId().equals(userId))) {
-				flag = false;
-			}
-
-			if (flag) {
-				return Response.status(Status.OK).entity(user).build();
-			} else {
+			if (header == null || !header.startsWith("Bearer ")) {
 				user.setMobileNumber(null);
 				user.setEmail(null);
+				return Response.status(Status.OK).entity(user).build();
+			}
+
+			// User is logged in but token is expired or invalid
+			if (profile == null) {
+				user.setMobileNumber(null);
+				user.setEmail(null);
+				return Response.status(Status.OK).entity(user).build();
+			}
+
+			// Check for admin
+			if (AuthUtility.isAdmin(request) || profile.getId().equals(userId)) {
+				return Response.status(Status.OK).entity(user).build();
+			}
+
+			// If user profile is not admin and trying to see somebody else profile
+			if (!AuthUtility.isAdmin(request) && !profile.getId().equals(userId)) {
+				user.setEmail(null);
+				user.setMobileNumber(null);
 				return Response.status(Status.OK).entity(user).build();
 			}
 
@@ -128,6 +140,7 @@ public class UserController {
 			logger.error(e.getMessage());
 			return Response.status(Status.NOT_FOUND).build();
 		}
+		return Response.status(Status.BAD_REQUEST).build();
 	}
 
 	@GET
