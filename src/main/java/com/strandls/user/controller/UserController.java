@@ -102,8 +102,7 @@ public class UserController {
 	@ApiOperation(value = "Find User by User ID", notes = "Returns User details", response = User.class)
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "Traits not found", response = String.class) })
 
-	public Response getUser(@Context HttpServletRequest request, @PathParam("userId") String userId)
-			throws UnAuthorizedUserException, ApiException {
+	public Response getUser(@Context HttpServletRequest request, @PathParam("userId") String userId) {
 
 		try {
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
@@ -126,7 +125,7 @@ public class UserController {
 			}
 
 			// Check for admin
-			if (AuthUtility.isAdmin(request)) {
+			if (AuthUtility.isAdmin(request) || profile.getId().equals(userId)) {
 				return Response.status(Status.OK).entity(user).build();
 			}
 
@@ -186,8 +185,7 @@ public class UserController {
 	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
 
-	public Response getUserBulk(@Context HttpServletRequest request, @ApiParam("userIds") List<Long> userIdList)
-			throws UnAuthorizedUserException, ApiException {
+	public Response getUserBulk(@Context HttpServletRequest request, @ApiParam("userIds") List<Long> userIdList) {
 
 		try {
 
