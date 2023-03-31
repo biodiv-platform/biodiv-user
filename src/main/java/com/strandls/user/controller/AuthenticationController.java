@@ -1,7 +1,10 @@
 package com.strandls.user.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -268,6 +271,101 @@ public class AuthenticationController {
 			logger.error(ex.getMessage());
 			return Response.status(Status.BAD_REQUEST).entity("Could not create user").build();
 		}
+	}
+
+	@POST
+	@Path(ApiConstants.BULK + ApiConstants.SIGNUP)
+	@ValidateUser
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Create bulk user", notes = "Returns the created user", response = Map.class)
+	public Response bulkSignUp(@Context HttpServletRequest request, @ApiParam(name = "userDTOs") UserDTO[] userDTOs) {
+		List<Map<String, Object>> responseDataList = new ArrayList<>();
+
+		Boolean isAdmin = false;
+		CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+		JSONArray roles = (JSONArray) profile.getAttribute("roles");
+		if (roles.contains("ROLE_ADMIN"))
+			isAdmin = true;
+
+		try {
+			if (isAdmin) {
+
+				for (UserDTO userDTO : userDTOs) {
+					String username = userDTO.getUsername();
+					String password = userDTO.getPassword();
+					String confirmPassword = userDTO.getConfirmPassword();
+					String location = userDTO.getLocation();
+					Double latitude = userDTO.getLatitude();
+					Double longitude = userDTO.getLongitude();
+					String email = userDTO.getEmail().toLowerCase();
+					String mobileNumber = userDTO.getMobileNumber();
+					String verificationType = AppUtil.getVerificationType(userDTO.getVerificationType());
+					String mode = userDTO.getMode();
+
+					if (username == null || username.isEmpty()) {
+						responseDataList.add(Collections.singletonMap("error", "Username cannot be empty"));
+						continue;
+					}
+					if (mode != null && mode.equalsIgnoreCase("manual")) {
+						if (!password.equals(confirmPassword) || password.length() < 8) {
+							responseDataList.add(
+									Collections.singletonMap("error", "Password must be longer than 8 characters"));
+							continue;
+						}
+					} else if (mode != null && mode.equalsIgnoreCase(AppUtil.AUTH_MODE.OAUTH_GOOGLE.getAction())) {
+						JSONObject obj = AuthUtility.verifyGoogleToken(password);
+						if (obj == null) {
+							responseDataList.add(Collections.singletonMap("error", "Google token expired"));
+							continue;
+						}
+						if (!obj.getString("email").equalsIgnoreCase(email)) {
+							responseDataList.add(Collections.singletonMap("error",
+									AppUtil.generateResponse(false, ERROR_CONSTANTS.EMAIL_VERIFICATION_FAILED)));
+							continue;
+						}
+					} else {
+						responseDataList.add(Collections.singletonMap("error", "Invalid auth code"));
+						continue;
+					}
+					if (location == null) {
+						responseDataList.add(Collections.singletonMap("error", "Location cannot be null"));
+						continue;
+					}
+					if (latitude == null) {
+						responseDataList.add(Collections.singletonMap("error", "Latitude cannot be null"));
+						continue;
+					}
+					if (longitude == null) {
+						responseDataList.add(Collections.singletonMap("error", "Longitude cannot be null"));
+						continue;
+					}
+					if (verificationType == null) {
+						responseDataList.add(Collections.singletonMap("error", "Invalid verification type"));
+						continue;
+					}
+					if (VERIFICATION_TYPE.EMAIL.toString().equalsIgnoreCase(verificationType)
+							&& !ValidationUtil.validateEmail(email)) {
+						responseDataList.add(Collections.singletonMap("error", "Invalid email"));
+						continue;
+					} else if (VERIFICATION_TYPE.MOBILE.toString().equalsIgnoreCase(verificationType)
+							&& !ValidationUtil.validatePhone(mobileNumber)) {
+						responseDataList.add(Collections.singletonMap("error", "Invalid mobile number"));
+						continue;
+					}
+					Map<String, Object> data = authenticationService.addUser(request, userDTO, verificationType);
+					responseDataList.add(data);
+				}
+			}
+
+		} catch (Exception ex) {
+			Map<String, Object> error = new HashMap<>();
+			error.put("error", "Could not create user: " + ex.getMessage());
+			logger.error(ex.getMessage());
+			responseDataList.add(error);
+		}
+		return Response.status(Status.OK).entity(responseDataList).build();
+
 	}
 
 	@POST
