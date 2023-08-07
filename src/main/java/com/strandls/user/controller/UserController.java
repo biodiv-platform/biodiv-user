@@ -585,10 +585,11 @@ public class UserController {
 			}
 
 			MapAggregationResponse aggregationResult = null;
-
-			aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
-					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, geoShapeFilterField, taxonRole, taxonomyList, mapSearchParams);
+			if(offset==0) {
+				aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
+						institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
+						lastLoggedInMaxDate, role, geoShapeFilterField, taxonRole, taxonomyList, mapSearchParams);
+			}
 
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
 					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
