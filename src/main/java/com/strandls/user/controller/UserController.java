@@ -159,11 +159,11 @@ public class UserController {
 
 	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
 	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-	
+
 	public Response getUserBulk(@ApiParam("userIds") List<Long> userIdList) {
 
 		try {
-			List<User> users= userService.fetchUserBulk(userIdList);
+			List<User> users = userService.fetchUserBulk(userIdList);
 			return Response.status(Status.OK).entity(users).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).build();
@@ -585,10 +585,12 @@ public class UserController {
 			}
 
 			MapAggregationResponse aggregationResult = null;
-
-			aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
-					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
-					lastLoggedInMaxDate, role, geoShapeFilterField, taxonRole, taxonomyList, mapSearchParams);
+			if (offset == 0) {
+				aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
+						institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList,
+						lastLoggedInMinDate, lastLoggedInMaxDate, role, geoShapeFilterField, taxonRole, taxonomyList,
+						mapSearchParams);
+			}
 
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
 					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
