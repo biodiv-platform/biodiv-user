@@ -33,9 +33,6 @@ import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.AmazonSNSClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -51,6 +48,11 @@ import com.strandls.user.es.utils.EsUtilModule;
 import com.strandls.user.service.impl.UserServiceModule;
 import com.strandls.user.util.PropertyFileUtil;
 import com.strandls.user.util.SNSUtil;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
 
 /**
  * @author Abhishek Rudra
@@ -108,11 +110,13 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				Properties prop = PropertyFileUtil.fetchProperty("config.properties");
 				String ACCESS_ID = prop.getProperty("sns_access_id");
 				String SECRET_ACCESS_KEY = prop.getProperty("sns_secret_access_key");
+				Region region = Region.AP_SOUTH_1;
 
-				AWSCredentials credentials = new BasicAWSCredentials(ACCESS_ID, SECRET_ACCESS_KEY);
-				AmazonSNSClient snsClient = new AmazonSNSClient(credentials);
+				AwsBasicCredentials credentials = AwsBasicCredentials.create(ACCESS_ID, SECRET_ACCESS_KEY);
+				SnsClient snsClient = SnsClient.builder().region(region)
+						.credentialsProvider(StaticCredentialsProvider.create(credentials)).build();
 
-				bind(AmazonSNSClient.class).toInstance(snsClient);
+				bind(SnsClient.class).toInstance(snsClient);
 				bind(SNSUtil.class).in(Scopes.SINGLETON);
 
 				String JWT_SALT = PropertyFileUtil.fetchProperty("config.properties", "jwtSalt");
