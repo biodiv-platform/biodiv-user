@@ -110,7 +110,7 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				Properties prop = PropertyFileUtil.fetchProperty("config.properties");
 				String ACCESS_ID = prop.getProperty("sns_access_id");
 				String SECRET_ACCESS_KEY = prop.getProperty("sns_secret_access_key");
-				Region region = Region.AP_SOUTH_1;
+				Region region = Region.US_EAST_1;
 
 				AwsBasicCredentials credentials = AwsBasicCredentials.create(ACCESS_ID, SECRET_ACCESS_KEY);
 				SnsClient snsClient = SnsClient.builder().region(region)
