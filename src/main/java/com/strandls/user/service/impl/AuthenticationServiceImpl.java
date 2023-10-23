@@ -56,7 +56,11 @@ import net.minidev.json.JSONArray;
 
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-	Properties prop = PropertyFileUtil.fetchProperty("config.properties");
+	private String hello = "Hello ";
+	private String siteName = "siteName";
+	private String config = "config.properties";
+
+	Properties prop = PropertyFileUtil.fetchProperty(config);
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
@@ -87,22 +91,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	public String generateSms(String otp, String type, User user) {
 		switch (type) {
 		case "forgotPassword":
-			return "Hello " + user.getName() + ","
-					+ "You (or someone pretending to be you) requested that your password be reset. "
-					+ " If you have made this request, enter below OTP to reset your password. " + otp + " Regards,"
-					+ prop.getProperty("siteName");
+			return hello + user.getName()
+					+ ", You (or someone pretending to be you) requested that your password be reset on the "
+					+ prop.getProperty(siteName)
+					+ ". If you have made this request, enter below OTP to reset your password. " + otp;
 		case "regenerateOtp":
-			return "Hello " + user.getName() + "," + "Your regenerated otp is " + otp
-					+ " please note that you cant regenate more than 5 opts in 24 hours" + " Regards,"
-					+ prop.getProperty("siteName");
-
+			return hello + user.getName() + ", Your regenerated otp for  " + prop.getProperty(siteName) + " is " + otp;
 		case "activationSms":
-			return "Hello " + user.getName() + ","
-					+ "You (or someone pretending to be you) requested to create an account . "
-					+ " If you have made this request, enter below OTP to activate your account. " + otp + " Regards,"
-					+ prop.getProperty("siteName");
+			return hello + user.getName()
+					+ ", You (or someone pretending to be you) requested to create an account on  "
+					+ prop.getProperty(siteName)
+					+ ". If you have made this request, enter below OTP to activate your account. " + otp;
 		default:
-			return "Welcome to  " + prop.getProperty("siteName") + " Thanks for joining us !";
+			return "Welcome to  " + prop.getProperty(siteName) + ". Thanks for joining us !";
 		}
 	}
 
@@ -160,7 +161,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private String generateAccessToken(CommonProfile profile, User user) {
 		JwtGenerator<CommonProfile> generator = new JwtGenerator<>(
-				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty("config.properties", "jwtSalt")));
+				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty(config, "jwtSalt")));
 
 		Set<String> roles = new HashSet<>();
 		if (user.getRoles() != null) {
@@ -183,7 +184,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private String generateRefreshToken(CommonProfile profile, User user) {
 		JwtGenerator<CommonProfile> generator = new JwtGenerator<>(
-				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty("config.properties", "jwtSalt")));
+				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty(config, "jwtSalt")));
 
 		Set<String> roles = new HashSet<>();
 		if (user.getRoles() != null) {
