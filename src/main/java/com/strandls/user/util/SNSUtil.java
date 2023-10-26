@@ -8,32 +8,34 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.MessageAttributeValue;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
 
 public class SNSUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SNSUtil.class);
 
 	@Inject
-	private AmazonSNSClient snsClient;
+	private SnsClient snsClient;
 
 	public void sendSMS(String message, String phoneNumber) {
+		try {
+			MessageAttributeValue smsTypeAttribute = MessageAttributeValue.builder().dataType("String")
+					.stringValue("Transactional").build();
 
-		Map<String, MessageAttributeValue> attributes = new HashMap<>();
-		attributes.put("AWS.SNS.SMS.MaxPrice",
-				new MessageAttributeValue().withDataType("Number").withStringValue("0.003"));
-		attributes.put("AWS.SNS.SMS.SenderID",
-				new MessageAttributeValue().withDataType("String").withStringValue("IBPTEST"));
-		attributes.put("AWS.SNS.SMS.SMSType",
-				new MessageAttributeValue().withDataType("String").withStringValue("Transactional"));
+			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("AWS.SNS.SMS.SMSType", smsTypeAttribute);
 
-		PublishResult result = snsClient.publish(new PublishRequest().withMessage(message).withPhoneNumber(phoneNumber)
-				.withMessageAttributes(attributes));
+			PublishRequest request = PublishRequest.builder().message(message).phoneNumber(phoneNumber)
+					.messageAttributes(messageAttributes).build();
 
-		logger.debug(result.getMessageId());
+			snsClient.publish(request);
+
+		} catch (SdkException e) {
+			logger.error("Error sending SMS: {}", e.getMessage());
+		}
 	}
 
 }
