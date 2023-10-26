@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -55,6 +56,12 @@ import net.minidev.json.JSONArray;
 
 public class AuthenticationServiceImpl implements AuthenticationService {
 
+	private String hello = "Hello ";
+	private String siteName = "siteName";
+	private String config = "config.properties";
+
+	Properties prop = PropertyFileUtil.fetchProperty(config);
+
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
 	@Inject
@@ -80,6 +87,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Inject
 	private UserVerificationService verificationService;
+
+	public String generateSms(String otp, String type, User user) {
+		switch (type) {
+		case "forgotPassword":
+			return hello + user.getName()
+					+ ", You (or someone pretending to be you) requested that your password be reset on the "
+					+ prop.getProperty(siteName)
+					+ ". If you have made this request, enter below OTP to reset your password. " + otp;
+		case "regenerateOtp":
+			return hello + user.getName() + ", Your regenerated otp for  " + prop.getProperty(siteName) + " is " + otp;
+		case "activationSms":
+			return hello + user.getName()
+					+ ", You (or someone pretending to be you) requested to create an account on  "
+					+ prop.getProperty(siteName)
+					+ ". If you have made this request, enter below OTP to activate your account. " + otp;
+		default:
+			return "Welcome to  " + prop.getProperty(siteName) + ". Thanks for joining us !";
+		}
+	}
 
 	@Override
 	public Map<String, Object> authenticateUser(String userEmail, String password) {
@@ -135,7 +161,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private String generateAccessToken(CommonProfile profile, User user) {
 		JwtGenerator<CommonProfile> generator = new JwtGenerator<>(
-				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty("config.properties", "jwtSalt")));
+				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty(config, "jwtSalt")));
 
 		Set<String> roles = new HashSet<>();
 		if (user.getRoles() != null) {
@@ -158,7 +184,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private String generateRefreshToken(CommonProfile profile, User user) {
 		JwtGenerator<CommonProfile> generator = new JwtGenerator<>(
-				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty("config.properties", "jwtSalt")));
+				new SecretSignatureConfiguration(PropertyFileUtil.fetchProperty(config, "jwtSalt")));
 
 		Set<String> roles = new HashSet<>();
 		if (user.getRoles() != null) {
@@ -262,7 +288,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			} else if (verificationType.equalsIgnoreCase("MOBILE")) {
 				verificationService.saveOtp(user.getId(), otp, VERIFICATION_TYPE.MOBILE.toString(),
 						user.getMobileNumber(), VERIFICATION_ACTIONS.USER_REGISTRATION.toString());
-				smsService.sendSMS(user.getMobileNumber(), otp);
+				smsService.sendSMS(user.getMobileNumber(), generateSms(otp, "activationSms", user));
 			}
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
@@ -301,7 +327,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				if (AppUtil.VERIFICATION_TYPE.EMAIL.toString().equalsIgnoreCase(verification.getVerificationType())) {
 					mailService.sendWelcomeMail(request, user);
 				} else {
-					smsService.sendSMS(verification.getVerificationId(), "Welcome to IBP");
+					smsService.sendSMS(verification.getVerificationId(), generateSms("", "", null));
 				}
 				verificationService.deleteOtp(verification.getId());
 			} else {
@@ -363,7 +389,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 					mailService.sendForgotPasswordMail(request, user, otp);
 				}
 			} else {
-				smsService.sendSMS(verificationId, otp);
+				smsService.sendSMS(verificationId, generateSms(otp, "regenerateOtp", user));
 			}
 		} catch (Exception ex) {
 			data.put(Constants.STATUS, false);
@@ -431,7 +457,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			if (AppUtil.VERIFICATION_TYPE.EMAIL.toString().equalsIgnoreCase(verification.getVerificationType())) {
 				mailService.sendForgotPasswordMail(request, user, otp);
 			} else {
-				smsService.sendSMS(verification.getVerificationId(), otp);
+				smsService.sendSMS(verification.getVerificationId(), generateSms(otp, "forgotPassword", user));
 			}
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
