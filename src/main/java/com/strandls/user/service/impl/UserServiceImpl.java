@@ -311,6 +311,8 @@ public class UserServiceImpl implements UserService {
 			objectType = Constants.CONTENT_EML_DOCUMENT;
 		else if (objectType.equalsIgnoreCase(Constants.SPECIES))
 			objectType = Constants.SPECIES_SPECIES;
+		else if (objectType.equalsIgnoreCase(Constants.DATATABLE))
+			objectType = Constants.DATATABLE;
 		Follow follow = followDao.findByObject(objectType, objectId, userId);
 		if (follow == null) {
 			follow = new Follow(null, objectId, objectType, userId, new Date());
