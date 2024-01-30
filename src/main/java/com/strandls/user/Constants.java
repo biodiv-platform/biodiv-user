@@ -20,6 +20,7 @@ public class Constants {
 	public static final String CONTENT_EML_DOCUMENT = "content.eml.Document";
 	public static final String SPECIES = "species";
 	public static final String SPECIES_SPECIES = "species.Species";
+	public static final String DATATABLE = "content.eml.Datatable";
 
 	public enum SUCCESS_CONSTANTS {
 		TOKEN_SAVED, AUTHENTICATION_SUCCESSFUL, USER_VERIFICATION_SUCCESSFUL, OTP_REGENERATED, EMAIL_SMS_SENT,
