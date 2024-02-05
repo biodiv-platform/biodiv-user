@@ -4,6 +4,7 @@
 package com.strandls.user.service;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,9 +30,8 @@ public interface UserService {
 	public UserIbp fetchUserIbp(Long userId);
 
 	public List<UserIbp> fetchUserIbpBulk(List<Long> userIds);
-	
-	public List<User> fetchUserBulk(List<Long> userIds);
 
+	public List<User> fetchUserBulk(List<Long> userIds);
 
 	public User getUserByEmailOrMobile(String data);
 
@@ -78,4 +78,6 @@ public interface UserService {
 	public void esUserUpdate(User user, Boolean isUpdate) throws ApiException;
 
 	public User unsubscribeByUserEmail(String email) throws Exception;
+
+	public Set<UserIbp> getAutoComplete(String userGroupId, String searchText);
 }
