@@ -428,10 +428,9 @@ public class UserController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(value = "Names autocomplete using es", notes = "Returns list of names", response = String.class)
 	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to return the data", response = String.class) })
-	public Response esAutocomplete(@QueryParam("searchText") String searchText,
-			@QueryParam("userGroupId") String userGroupId) {
+	public Response esAutocomplete(@QueryParam("name") String name, @QueryParam("userGroupId") String userGroupId) {
 		try {
-			Set<UserIbp> users = userService.getAutoComplete(userGroupId, searchText);
+			Set<UserIbp> users = userService.getAutoComplete(userGroupId, name);
 			return Response.ok().entity(users).build();
 		} catch (Exception ex) {
 			return Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();

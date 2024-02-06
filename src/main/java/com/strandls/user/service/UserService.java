@@ -79,5 +79,5 @@ public interface UserService {
 
 	public User unsubscribeByUserEmail(String email) throws Exception;
 
-	public Set<UserIbp> getAutoComplete(String userGroupId, String searchText);
+	public Set<UserIbp> getAutoComplete(String userGroupId, String name);
 }

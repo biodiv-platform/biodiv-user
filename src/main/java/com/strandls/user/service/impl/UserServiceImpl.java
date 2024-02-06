@@ -412,10 +412,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Set<UserIbp> getAutoComplete(String usergroupId, String searchText) {
+	public Set<UserIbp> getAutoComplete(String usergroupId, String name) {
 		try {
 			MapResponse result = esService.autocompleteUserIBP(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(),
-					usergroupId, searchText);
+					usergroupId, name);
 
 			return result.getDocuments().stream().map(document -> {
 				try {
