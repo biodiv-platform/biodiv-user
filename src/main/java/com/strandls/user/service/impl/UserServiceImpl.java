@@ -423,7 +423,7 @@ public class UserServiceImpl implements UserService {
 					JsonNode userNode = rootNode.path("user");
 
 					Long userId = userNode.path("id").asLong();
-					String userName = userNode.path("userName").asText();
+					String userName = userNode.path("name").asText();
 					String profilePic = userNode.path("profilePic").asText();
 					Boolean isAdmin = userNode.path("isAdmin").asBoolean();
 
