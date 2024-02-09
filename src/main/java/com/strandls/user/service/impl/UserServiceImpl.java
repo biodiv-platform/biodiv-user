@@ -3,13 +3,17 @@
  */
 package com.strandls.user.service.impl;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -19,12 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.esmodule.ApiException;
 import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.esmodule.pojo.MapDocument;
+import com.strandls.esmodule.pojo.MapResponse;
 import com.strandls.user.Constants;
 import com.strandls.user.dao.FirebaseDao;
 import com.strandls.user.dao.FollowDao;
@@ -403,6 +409,35 @@ public class UserServiceImpl implements UserService {
 			result.add(fetchUser(adminId));
 		}
 		return result;
+	}
+
+	@Override
+	public Set<UserIbp> getAutoComplete(String usergroupId, String name) {
+		try {
+			MapResponse result = esService.autocompleteUserIBP(UserIndex.INDEX.getValue(), UserIndex.TYPE.getValue(),
+					usergroupId, name);
+
+			return result.getDocuments().stream().map(document -> {
+				try {
+					JsonNode rootNode = om.readTree(document.getDocument().toString());
+					JsonNode userNode = rootNode.path("user");
+
+					Long userId = userNode.path("id").asLong();
+					String userName = userNode.path("name").asText();
+					String profilePic = userNode.path("profilePic").asText();
+					Boolean isAdmin = userNode.path("isAdmin").asBoolean();
+
+					return new UserIbp(userId, userName, profilePic, isAdmin);
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+					return null;
+				}
+			}).filter(Objects::nonNull).collect(Collectors.toSet());
+
+		} catch (Exception ex) {
+			logger.error(ex.getMessage());
+		}
+		return Collections.emptySet();
 	}
 
 }
