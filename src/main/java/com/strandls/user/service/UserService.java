@@ -80,4 +80,6 @@ public interface UserService {
 	public User unsubscribeByUserEmail(String email) throws Exception;
 
 	public Set<UserIbp> getAutoComplete(String userGroupId, String name);
+	
+	public Set<UserIbp> getSpeciesContributorAutoComplete(String name);
 }

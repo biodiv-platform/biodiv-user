@@ -437,6 +437,21 @@ public class UserController {
 		}
 	}
 
+	@GET
+	@Path(ApiConstants.SPECIESCONTRIBUTOR + ApiConstants.AUTOCOMPLETE)
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Names autocomplete using es", notes = "Returns list of names", response = String.class)
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to return the data", response = String.class) })
+	public Response getSpeciesContributorAutocompleteEs(@QueryParam("name") String name) {
+		try {
+			Set<UserIbp> users = userService.getSpeciesContributorAutoComplete(name);
+			return Response.ok().entity(users).build();
+		} catch (Exception ex) {
+			return Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();
+		}
+	}
+
 	@POST
 	@Path(ApiConstants.RECIPIENTS)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
