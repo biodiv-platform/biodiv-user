@@ -440,4 +440,33 @@ public class UserServiceImpl implements UserService {
 		return Collections.emptySet();
 	}
 
+	@Override
+	public Set<UserIbp> getSpeciesContributorAutoComplete(String name) {
+		try {
+			MapResponse result = esService.autocompleteUserSpeciesContributor(UserIndex.INDEX.getValue(),
+					UserIndex.TYPE.getValue(), name);
+
+			return result.getDocuments().stream().map(document -> {
+				try {
+					JsonNode rootNode = om.readTree(document.getDocument().toString());
+					JsonNode userNode = rootNode.path("user");
+
+					Long userId = userNode.path("id").asLong();
+					String userName = userNode.path("name").asText();
+					String profilePic = userNode.path("profilePic").asText();
+					Boolean isAdmin = userNode.path("isAdmin").asBoolean();
+
+					return new UserIbp(userId, userName, profilePic, isAdmin);
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+					return null;
+				}
+			}).filter(Objects::nonNull).collect(Collectors.toSet());
+
+		} catch (Exception ex) {
+			logger.error(ex.getMessage());
+		}
+		return Collections.emptySet();
+	}
+
 }
