@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
@@ -42,6 +45,8 @@ public class UserListServiceImpl implements UserListService {
 
 	@Inject
 	private EsUtility esUtility;
+
+	private final ExecutorService executor = Executors.newFixedThreadPool(20);
 
 	@Override
 	public UserListData getUserListData(HttpServletRequest request, String index, String type,
@@ -98,9 +103,12 @@ public class UserListServiceImpl implements UserListService {
 			MapSearchQuery searchQuery, Map<String, AggregationResponse> mapResponse, CountDownLatch latch,
 			String geoShapeFilterField) {
 
-		LatchThreadWorker worker = new LatchThreadWorker(index, type, filter, geoAggregationField, searchQuery,
-				mapResponse, latch, geoShapeFilterField, esService);
-		worker.start();
+//		LatchThreadWorker worker = new LatchThreadWorker(index, type, filter, geoAggregationField, searchQuery,
+//				mapResponse, latch, geoShapeFilterField, esService);
+		executor.submit(new LatchThreadWorker(index, type, filter, geoAggregationField, searchQuery, mapResponse, latch,
+				geoShapeFilterField, esService));
+
+		// worker.start();
 
 	}
 
@@ -217,11 +225,21 @@ public class UserListServiceImpl implements UserListService {
 					latch, geoShapeFilterField);
 		}
 
+//		try {
+//			latch.await();
+//		} catch (Exception e) {
+//			logger.error(e.getMessage());
+//			Thread.currentThread().interrupt();
+//		}
+
 		try {
-			latch.await();
-		} catch (Exception e) {
-			logger.error(e.getMessage());
+			if (!latch.await(30, TimeUnit.SECONDS)) { // Timeout after 30s
+				logger.warn("Timed out waiting for aggregations");
+				// Handle partial results or fail fast
+			}
+		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+			throw new RuntimeException("Aggregation interrupted", e);
 		}
 
 		aggregationResponse.setProfession(mapAggResponse.get(UserIndex.OCCUPATION_KEYWORD.getValue()) != null

@@ -61,9 +61,10 @@ public class LatchThreadWorker extends Thread {
 			AggregationResponse response = esService.getAggregation(index, type, filter, geoAggregationField,
 					geoShapeFilterField, searchQuery);
 			mapResponse.put(filter, response);
-			latch.countDown();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
+		} finally {
+			latch.countDown();
 		}
 	}
 }
