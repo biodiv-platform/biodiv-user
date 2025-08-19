@@ -2,43 +2,40 @@ package com.strandls.user.pojo;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import io.swagger.annotations.ApiModel;
+// --- OpenAPI 3 for Jakarta EE 10 / Swagger v3 ---
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "language")
-@ApiModel(value = "Language")
+@Schema(name = "Language")
 public class Language implements Serializable {
-	
+
 	public static final String DEFAULT_LANGUAGE = "English";
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -5174150654225962483L;
 
 	@Id
 	@GeneratedValue
 	@Column(name = "id")
 	private Long id;
-	
+
 	@Column(name = "name")
 	private String name;
-	
+
 	@Column(name = "three_letter_code")
 	private String threeLetterCode;
-	
+
 	@Column(name = "two_letter_code")
 	private String twoLetterCode;
-	
+
 	@Column(name = "is_dirty")
 	private Boolean isDirty;
-	
+
 	@Column(name = "region")
 	private String region;
 
@@ -89,5 +86,4 @@ public class Language implements Serializable {
 	public void setRegion(String region) {
 		this.region = region;
 	}
-
 }

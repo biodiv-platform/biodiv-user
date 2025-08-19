@@ -1,12 +1,10 @@
 /**
- * 
+ *
  */
 package com.strandls.user.service;
 
 import java.util.List;
 import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
 
 import com.strandls.esmodule.ApiException;
 import com.strandls.user.dto.FirebaseDTO;
@@ -18,6 +16,8 @@ import com.strandls.user.pojo.UserIbp;
 import com.strandls.user.pojo.requests.UserDetails;
 import com.strandls.user.pojo.requests.UserEmailPreferences;
 import com.strandls.user.pojo.requests.UserRoles;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Abhishek Rudra
@@ -80,6 +80,6 @@ public interface UserService {
 	public User unsubscribeByUserEmail(String email) throws Exception;
 
 	public Set<UserIbp> getAutoComplete(String userGroupId, String name);
-	
+
 	public Set<UserIbp> getSpeciesContributorAutoComplete(String name);
 }

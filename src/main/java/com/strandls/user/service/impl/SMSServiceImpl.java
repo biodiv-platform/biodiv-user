@@ -1,10 +1,10 @@
 package com.strandls.user.service.impl;
 
-import javax.inject.Inject;
-
 import com.strandls.user.service.SMSService;
 import com.strandls.user.util.SMSThread;
 import com.strandls.user.util.SNSUtil;
+
+import jakarta.inject.Inject;
 
 public class SMSServiceImpl implements SMSService {
 

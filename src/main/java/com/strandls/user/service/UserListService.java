@@ -1,12 +1,11 @@
 package com.strandls.user.service;
 
+import com.strandls.esmodule.pojo.MapSearchParams;
+import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.user.pojo.MapAggregationResponse;
 import com.strandls.user.pojo.UserListData;
 
-import javax.servlet.http.HttpServletRequest;
-
-import com.strandls.esmodule.pojo.MapSearchParams;
-import com.strandls.esmodule.pojo.MapSearchQuery;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface UserListService {
 

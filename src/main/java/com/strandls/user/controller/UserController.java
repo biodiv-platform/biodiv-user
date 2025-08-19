@@ -1,29 +1,11 @@
 /**
- * 
+ *
  */
 package com.strandls.user.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
@@ -58,13 +40,32 @@ import com.strandls.user.service.UserListService;
 import com.strandls.user.service.UserService;
 import com.strandls.user.util.AuthUtility;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+// OpenAPI 3 for Jakarta
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import net.minidev.json.JSONArray;
 
 /**
@@ -72,7 +73,7 @@ import net.minidev.json.JSONArray;
  *
  */
 
-@Api("User Service")
+@Tag(name = "User Service")
 @Path(ApiConstants.V1 + ApiConstants.USER)
 public class UserController {
 
@@ -80,16 +81,16 @@ public class UserController {
 	private EsUtility esUtility;
 	@Inject
 	private UserListService userListService;
-
-	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-
 	@Inject
 	private UserService userService;
+
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 	@GET
 	@Path(ApiConstants.PING)
 	@Produces(MediaType.TEXT_PLAIN)
-	@ApiOperation(value = "Dummy API Ping", notes = "Checks validity of war file at deployment", response = String.class)
+	@Operation(summary = "Dummy API Ping", description = "Checks validity of war file at deployment")
+	@ApiResponse(responseCode = "200", description = "Ping successful", content = @Content(schema = @Schema(type = "string", example = "PONG")))
 	public Response ping() {
 		return Response.status(Status.OK).entity("PONG").build();
 	}
@@ -98,14 +99,12 @@ public class UserController {
 	@Path("/{userId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Find User by User ID", notes = "Returns User details", response = User.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "Traits not found", response = String.class) })
-
+	@Operation(summary = "Find User by User ID", description = "Returns User details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "User found", content = @Content(schema = @Schema(implementation = User.class))),
+			@ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getUser(@PathParam("userId") String userId) {
-
 		try {
-
 			Long uId = Long.parseLong(userId);
 			User user = userService.fetchUser(uId);
 			if (user.getIsDeleted().booleanValue()) {
@@ -114,7 +113,7 @@ public class UserController {
 			return Response.status(Status.OK).entity(user).build();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
-			return Response.status(Status.NOT_FOUND).build();
+			return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
 		}
 	}
 
@@ -122,17 +121,17 @@ public class UserController {
 	@Path(ApiConstants.IBP + "/{userId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Find User by User ID for ibp", notes = "Returns User details", response = UserIbp.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-
+	@Operation(summary = "Find User by User ID for ibp", description = "Returns User details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "UserIbp found", content = @Content(schema = @Schema(implementation = UserIbp.class))),
+			@ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getUserIbp(@PathParam("userId") String userId) {
 		try {
 			Long id = Long.parseLong(userId);
 			UserIbp ibp = userService.fetchUserIbp(id);
 			return Response.status(Status.OK).entity(ibp).build();
 		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
@@ -140,15 +139,15 @@ public class UserController {
 	@Path(ApiConstants.IBP + "/users")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Find Users by User ID list for ibp", notes = "Returns Users details", response = List.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Empty user list.", response = List.class) })
-
-	public Response getUserIbpInBulk(@ApiParam("userIdList") List<Long> userIdList) {
+	@Operation(summary = "Find Users by User ID list for ibp", description = "Returns Users details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of UserIbp or empty.", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserIbp.class)))) })
+	public Response getUserIbpInBulk(
+			@RequestBody(description = "userIdList", required = true, content = @Content(array = @ArraySchema(schema = @Schema(type = "integer")))) List<Long> userIdList) {
 		try {
 			return Response.status(Status.OK).entity(userService.fetchUserIbpBulk(userIdList)).build();
 		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
@@ -156,17 +155,17 @@ public class UserController {
 	@Path(ApiConstants.IBP + "/userList")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = User.class, responseContainer = "List")
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-
-	public Response getUserBulk(@ApiParam("userIds") List<Long> userIdList) {
-
+	@Operation(summary = "Find User by User ID in bulk for ibp", description = "Returns User details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of users.", content = @Content(array = @ArraySchema(schema = @Schema(implementation = User.class)))),
+			@ApiResponse(responseCode = "400", description = "Bad request") })
+	public Response getUserBulk(
+			@RequestBody(description = "userIds", required = true, content = @Content(array = @ArraySchema(schema = @Schema(type = "integer")))) List<Long> userIdList) {
 		try {
 			List<User> users = userService.fetchUserBulk(userIdList);
 			return Response.status(Status.OK).entity(users).build();
 		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
@@ -174,8 +173,10 @@ public class UserController {
 	@Path(ApiConstants.UPDATE + ApiConstants.IMAGE)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "update the user", notes = "Returns User details", response = User.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+	@Operation(summary = "update the user", description = "Returns User details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Updated user", content = @Content(schema = @Schema(implementation = User.class))),
+			@ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string"))) })
 	@ValidateUser
 	public Response updateUserImage(@Context HttpServletRequest request, @QueryParam("id") Long userId,
 			@QueryParam("profilePic") String profilePic) throws UnAuthorizedUserException, ApiException {
@@ -187,11 +188,14 @@ public class UserController {
 	@Path(ApiConstants.UPDATE + ApiConstants.DETAILS)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "update the user", notes = "Returns User details", response = User.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+	@Operation(summary = "update the user", description = "Returns User details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Updated user", content = @Content(schema = @Schema(implementation = User.class))),
+			@ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string"))) })
 	@ValidateUser
 	public Response updateUserDetails(@Context HttpServletRequest request,
-			@ApiParam(name = "user") UserDetails inputUser) throws UnAuthorizedUserException, ApiException {
+			@RequestBody(description = "User update details", required = true, content = @Content(schema = @Schema(implementation = UserDetails.class))) UserDetails inputUser)
+			throws UnAuthorizedUserException, ApiException {
 		User user = userService.updateUserDetails(request, inputUser);
 		return Response.status(Status.OK).entity(user).build();
 	}
@@ -200,11 +204,14 @@ public class UserController {
 	@Path(ApiConstants.UPDATE + ApiConstants.EMAIL_PREFERENCES)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "update the user", notes = "Returns User Email preferences", response = User.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+	@Operation(summary = "update the user", description = "Returns User Email preferences")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Updated user", content = @Content(schema = @Schema(implementation = User.class))),
+			@ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string"))) })
 	@ValidateUser
 	public Response updateUserEmailPreferences(@Context HttpServletRequest request,
-			@ApiParam(name = "user") UserEmailPreferences inputUser) throws UnAuthorizedUserException, ApiException {
+			@RequestBody(description = "User email preferences", required = true, content = @Content(schema = @Schema(implementation = UserEmailPreferences.class))) UserEmailPreferences inputUser)
+			throws UnAuthorizedUserException, ApiException {
 		User user = userService.updateEmailPreferences(request, inputUser);
 		return Response.status(Status.OK).entity(user).build();
 	}
@@ -213,28 +220,26 @@ public class UserController {
 	@Path(ApiConstants.UNSUBSCRIBE + "/{token}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "unsubscriber user mail notification", notes = "Returns User details", response = User.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-
+	@Operation(summary = "Unsubscribe user mail notification", description = "Returns User details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Unsubscribed", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "400", description = "Invalid token or error", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(type = "string"))) })
 	public Response updateUserEmailPreferences(@PathParam("token") String token)
 			throws UnAuthorizedUserException, ApiException {
-
 		User user = null;
 		if (token == null || token.contentEquals("x")) {
 			return Response.status(Status.UNAUTHORIZED).entity("Unauthorized").build();
 		}
-
 		String email = AuthUtility.getUserEmail(token);
 		if (email == null || email.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("Provided token is invalid").build();
 		}
-
 		try {
 			user = userService.unsubscribeByUserEmail(email);
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
-
 		return Response.status(Status.OK).entity("Unsubscribed").build();
 	}
 
@@ -242,10 +247,13 @@ public class UserController {
 	@Path(ApiConstants.UPDATE + ApiConstants.ROLES)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "update the user", notes = "Returns User roles", response = User.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
+	@Operation(summary = "update the user", description = "Returns User roles")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Updated user", content = @Content(schema = @Schema(implementation = User.class))),
+			@ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string"))) })
 	@ValidateUser
-	public Response updateUserRoles(@Context HttpServletRequest request, @ApiParam(name = "user") UserRoles inputUser)
+	public Response updateUserRoles(@Context HttpServletRequest request,
+			@RequestBody(description = "User roles update", required = true, content = @Content(schema = @Schema(implementation = UserRoles.class))) UserRoles inputUser)
 			throws UnAuthorizedUserException, ApiException {
 		if (AuthUtility.isAdmin(request)) {
 			Response.status(Status.UNAUTHORIZED).build();
@@ -258,10 +266,10 @@ public class UserController {
 	@Path(ApiConstants.BULK + ApiConstants.IBP)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Find User by User ID in bulk for ibp", notes = "Returns User details", response = UserIbp.class, responseContainer = "List")
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-
+	@Operation(summary = "Find User by User ID in bulk for ibp", description = "Returns User details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Users found", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserIbp.class)))),
+			@ApiResponse(responseCode = "400", description = "User not found", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getUserIbbpBulk(@QueryParam("userIds") String userIds) {
 		try {
 			List<Long> uIds = new ArrayList<>();
@@ -269,21 +277,19 @@ public class UserController {
 				uIds.add(Long.parseLong(uId));
 			List<UserIbp> result = userService.fetchUserIbpBulk(uIds);
 			return Response.status(Status.OK).entity(result).build();
-
 		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
 	@GET
 	@Path(ApiConstants.ME)
 	@Produces(MediaType.APPLICATION_JSON)
-
 	@ValidateUser
-
-	@ApiOperation(value = "Find the Current user Details", notes = "Returns the Current User Details", response = User.class)
-	@ApiResponses(value = { @ApiResponse(code = 404, message = "User not found", response = String.class) })
-
+	@Operation(summary = "Find the Current user Details", description = "Returns the Current User Details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Current user", content = @Content(schema = @Schema(implementation = User.class))),
+			@ApiResponse(responseCode = "400", description = "Error", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getCurretUser(@Context HttpServletRequest request) {
 		try {
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
@@ -299,18 +305,17 @@ public class UserController {
 	@Path(ApiConstants.FOLLOW + "/{followId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Find follow by followid", notes = "Return follows", response = Follow.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Follow not Found", response = String.class) })
-
+	@Operation(summary = "Find follow by followid", description = "Return follows")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Follow found", content = @Content(schema = @Schema(implementation = Follow.class))),
+			@ApiResponse(responseCode = "400", description = "Follow not Found", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getByFollowID(@PathParam("followId") String followId) {
-
 		try {
 			Long id = Long.parseLong(followId);
 			Follow follow = userService.fetchByFollowId(id);
 			return Response.status(Status.OK).entity(follow).build();
 		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
@@ -318,23 +323,21 @@ public class UserController {
 	@Path(ApiConstants.OBJECTFOLLOW + "/{objectType}/{objectId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
 	@ValidateUser
-	@ApiOperation(value = "Find follow by objectId", notes = "Return follows", response = Follow.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Follow not Found", response = String.class) })
-
+	@Operation(summary = "Find follow by objectId", description = "Return follows")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Follow found", content = @Content(schema = @Schema(implementation = Follow.class))),
+			@ApiResponse(responseCode = "400", description = "Follow not Found", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getFollowByObject(@Context HttpServletRequest request, @PathParam("objectType") String objectType,
 			@PathParam("objectId") String objectId) {
 		try {
-
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
 			Long objId = Long.parseLong(objectId);
 			Long authId = Long.parseLong(profile.getId());
-
 			Follow follow = userService.fetchByFollowObject(objectType, objId, authId);
 			return Response.status(Status.OK).entity(follow).build();
 		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
@@ -342,22 +345,20 @@ public class UserController {
 	@Path(ApiConstants.USERFOLLOW + "/{userId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
 	@ValidateUser
-	@ApiOperation(value = "Find follow by userID", notes = "Return list follows", response = Follow.class, responseContainer = "List")
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Follow not Found", response = String.class) })
-
+	@Operation(summary = "Find follow by userID", description = "Return list follows")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of follows", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Follow.class)))),
+			@ApiResponse(responseCode = "400", description = "Follow not Found", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getFollowbyUser(@Context HttpServletRequest request) {
-
 		try {
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
 			Long id = Long.parseLong(profile.getId());
 			List<Follow> follows = userService.fetchFollowByUser(id);
 			return Response.status(Status.OK).entity(follows).build();
 		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
-
 	}
 
 	@POST
@@ -365,10 +366,10 @@ public class UserController {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ValidateUser
-
-	@ApiOperation(value = "Marks follow for a User", notes = "Returnt the follow details", response = Follow.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to mark follow", response = String.class) })
-
+	@Operation(summary = "Marks follow for a User", description = "Returns the follow details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Updated follow", content = @Content(schema = @Schema(implementation = Follow.class))),
+			@ApiResponse(responseCode = "400", description = "Unable to mark follow", content = @Content(schema = @Schema(type = "string"))) })
 	public Response updateFollow(@Context HttpServletRequest request, @FormParam("object") String object,
 			@FormParam("objectId") String objectId) {
 		try {
@@ -376,7 +377,6 @@ public class UserController {
 			Long userId = Long.parseLong(profile.getId());
 			Long objId = Long.parseLong(objectId);
 			Follow result = userService.updateFollow(object, objId, userId);
-
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -388,10 +388,10 @@ public class UserController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ValidateUser
-
-	@ApiOperation(value = "Marks unfollow for a User", notes = "Returnt the follow details", response = Follow.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to mark unfollow", response = String.class) })
-
+	@Operation(summary = "Marks unfollow for a User", description = "Returns the follow details")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Unfollowed", content = @Content(schema = @Schema(implementation = Follow.class))),
+			@ApiResponse(responseCode = "400", description = "Unable to mark unfollow", content = @Content(schema = @Schema(type = "string"))) })
 	public Response unfollow(@Context HttpServletRequest request, @PathParam("type") String type,
 			@PathParam("objectId") String objectId) {
 		try {
@@ -399,9 +399,7 @@ public class UserController {
 			Long userId = Long.parseLong(profile.getId());
 			Long objId = Long.parseLong(objectId);
 			Follow result = userService.unFollow(type, objId, userId);
-
 			return Response.status(Status.OK).entity(result).build();
-
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
@@ -411,8 +409,10 @@ public class UserController {
 	@Path(ApiConstants.AUTOCOMPLETE)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Names autocomplete", notes = "Returns list of names", response = String.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to return the data", response = String.class) })
+	@Operation(summary = "Names autocomplete", description = "Returns list of names")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of ibp users", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserIbp.class)))),
+			@ApiResponse(responseCode = "400", description = "Unable to return the data", content = @Content(schema = @Schema(type = "string"))) })
 	public Response autocomplete(@QueryParam("name") String name) {
 		try {
 			Set<UserIbp> users = UserConverter.convertToIbpSet(userService.getNames(name));
@@ -426,8 +426,10 @@ public class UserController {
 	@Path(ApiConstants.IBP + ApiConstants.AUTOCOMPLETE)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Names autocomplete using es", notes = "Returns list of names", response = String.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to return the data", response = String.class) })
+	@Operation(summary = "Names autocomplete using es", description = "Returns list of names")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of ibp users (es)", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserIbp.class)))),
+			@ApiResponse(responseCode = "400", description = "Unable to return the data", content = @Content(schema = @Schema(type = "string"))) })
 	public Response esAutocomplete(@QueryParam("name") String name, @QueryParam("userGroupId") String userGroupId) {
 		try {
 			Set<UserIbp> users = userService.getAutoComplete(userGroupId, name);
@@ -441,8 +443,10 @@ public class UserController {
 	@Path(ApiConstants.SPECIESCONTRIBUTOR + ApiConstants.AUTOCOMPLETE)
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Names autocomplete using es", notes = "Returns list of names", response = String.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to return the data", response = String.class) })
+	@Operation(summary = "Names autocomplete using es", description = "Returns list of names")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of species contributors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserIbp.class)))),
+			@ApiResponse(responseCode = "400", description = "Unable to return the data", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getSpeciesContributorAutocompleteEs(@QueryParam("name") String name) {
 		try {
 			Set<UserIbp> users = userService.getSpeciesContributorAutoComplete(name);
@@ -456,8 +460,10 @@ public class UserController {
 	@Path(ApiConstants.RECIPIENTS)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Fetches recipients", notes = "Returns list of recipients", response = Recipients.class, responseContainer = "List")
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to return the data", response = String.class) })
+	@Operation(summary = "Fetches recipients", description = "Returns list of recipients")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of recipients", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Recipients.class)))),
+			@ApiResponse(responseCode = "400", description = "Unable to return the data", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getRecipients(@FormParam("objectType") String objectType, @FormParam("objectId") Long objectId) {
 		try {
 			List<Recipients> users = UserConverter
@@ -477,9 +483,12 @@ public class UserController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@ValidateUser
-	@ApiOperation(value = "Save Token", notes = "Associates token with a user", response = FirebaseTokens.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to return the data", response = String.class) })
-	public Response saveToken(@Context HttpServletRequest request, FirebaseDTO firebaseDTO) {
+	@Operation(summary = "Save Token", description = "Associates token with a user")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Token saved", content = @Content(schema = @Schema(implementation = FirebaseTokens.class))),
+			@ApiResponse(responseCode = "400", description = "Unable to return the data", content = @Content(schema = @Schema(type = "string"))) })
+	public Response saveToken(@Context HttpServletRequest request,
+			@RequestBody(description = "firebaseDTO", required = true, content = @Content(schema = @Schema(implementation = FirebaseDTO.class))) FirebaseDTO firebaseDTO) {
 		try {
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
 			Long userId = Long.parseLong(profile.getId());
@@ -495,8 +504,11 @@ public class UserController {
 	@ValidateUser
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Push Notifications", notes = "Send generalized push notifications to all users")
-	public Response sendGeneralNotification(@Context HttpServletRequest request, FirebaseDTO firebaseDTO) {
+	@Operation(summary = "Push Notifications", description = "Send generalized push notifications to all users")
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Notification sent"),
+			@ApiResponse(responseCode = "400", description = "Unable to send notification", content = @Content(schema = @Schema(type = "string"))) })
+	public Response sendGeneralNotification(@Context HttpServletRequest request,
+			@RequestBody(description = "firebaseDTO", required = true, content = @Content(schema = @Schema(implementation = FirebaseDTO.class))) FirebaseDTO firebaseDTO) {
 		try {
 			userService.sendPushNotifications(firebaseDTO);
 			return Response.status(Status.OK).build();
@@ -508,10 +520,10 @@ public class UserController {
 	@DELETE
 	@Path(ApiConstants.DELETE + "/{userId}")
 	@ValidateUser
-	@ApiOperation(value = "Delete an existing user", notes = "Gets the user id and deletes the user", response = String.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "authorization", paramType = "header") })
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Unable to delete the user", response = String.class) })
-
+	@Operation(summary = "Delete an existing user", description = "Gets the user id and deletes the user")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "User deleted", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "400", description = "Unable to delete the user", content = @Content(schema = @Schema(type = "string"))) })
 	public Response deleteUser(@Context HttpServletRequest request, @PathParam("userId") String userId) {
 		try {
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
@@ -535,10 +547,10 @@ public class UserController {
 	@GET
 	@Path(ApiConstants.ADMIN)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Fetch all the admins of the portal", notes = "Returns a list of admins", response = User.class, responseContainer = "List")
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the admins", response = String.class) })
-
+	@Operation(summary = "Fetch all the admins of the portal", description = "Returns a list of admins")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "List of users that are admins", content = @Content(array = @ArraySchema(schema = @Schema(implementation = User.class)))),
+			@ApiResponse(responseCode = "400", description = "unable to fetch the admins", content = @Content(schema = @Schema(type = "string"))) })
 	public Response getAllAdmins() {
 		try {
 			List<User> result = userService.getAllAdmins();
@@ -552,6 +564,10 @@ public class UserController {
 	@Path(ApiConstants.LIST + "/{index}/{type}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Get User list with filters, aggregation, map, etc.", description = "Returns paginated user list and aggregations")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Paginated user list + aggregations", content = @Content(schema = @Schema(implementation = UserListData.class))),
+			@ApiResponse(responseCode = "400", description = "Error", content = @Content(schema = @Schema(type = "string"))) })
 	public Response UserList(@Context HttpServletRequest request, @PathParam("index") String index,
 			@PathParam("type") String type, @DefaultValue("10") @QueryParam("max") Integer max,
 			@DefaultValue("0") @QueryParam("offset") Integer offset,
@@ -577,14 +593,11 @@ public class UserController {
 			@DefaultValue("") @QueryParam("phoneNumber") String phoneNumber,
 			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
 			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
-			@ApiParam(name = "location") EsLocationListParams location) {
-
+			@RequestBody(required = false, description = "location params as EsLocationListParams", content = @Content(schema = @Schema(implementation = EsLocationListParams.class))) EsLocationListParams location) {
 		try {
-
 			if (max > 50) {
 				max = 50;
 			}
-
 			MapBounds bounds = null;
 			if (top != null || bottom != null || left != null || right != null) {
 				bounds = new MapBounds();
@@ -593,7 +606,6 @@ public class UserController {
 				bounds.setRight(right);
 				bounds.setTop(top);
 			}
-
 			MapBoundParams mapBoundsParams = new MapBoundParams();
 			MapSearchParams mapSearchParams = new MapSearchParams();
 			mapSearchParams.setFrom(offset);
@@ -602,7 +614,6 @@ public class UserController {
 			mapSearchParams.setSortOn(sortOn);
 			mapSearchParams.setSortType(SortTypeEnum.DESC);
 			mapSearchParams.setMapBoundParams(mapBoundsParams);
-
 			String loc = location.getLocation();
 			if (loc != null) {
 				if (loc.contains("/")) {
@@ -613,7 +624,6 @@ public class UserController {
 					mapBoundsParams.setPolygon(esUtility.polygonGenerator(loc));
 				}
 			}
-
 			MapAggregationResponse aggregationResult = null;
 			if (offset == 0) {
 				aggregationResult = userListService.mapAggregate(index, type, user, profession, phoneNumber, email, sex,
@@ -621,18 +631,14 @@ public class UserController {
 						lastLoggedInMinDate, lastLoggedInMaxDate, role, geoShapeFilterField, taxonRole, taxonomyList,
 						mapSearchParams);
 			}
-
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(user, profession, phoneNumber, email, sex,
 					institution, name, userName, createdOnMaxDate, createdOnMinDate, userGroupList, lastLoggedInMinDate,
 					lastLoggedInMaxDate, role, taxonRole, taxonomyList, mapSearchParams);
 			UserListData result = userListService.getUserListData(request, index, type, geoAggregationField,
 					geoShapeFilterField, nestedField, aggregationResult, mapSearchQuery);
 			return Response.status(Status.OK).entity(result).build();
-
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
-
 	}
-
 }

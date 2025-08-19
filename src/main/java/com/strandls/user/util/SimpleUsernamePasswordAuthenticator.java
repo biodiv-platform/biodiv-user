@@ -1,8 +1,5 @@
 package com.strandls.user.util;
 
-import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
-
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
@@ -15,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import com.strandls.user.pojo.User;
 import com.strandls.user.service.UserService;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
 public class SimpleUsernamePasswordAuthenticator implements Authenticator<UsernamePasswordCredentials> {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
@@ -23,11 +23,10 @@ public class SimpleUsernamePasswordAuthenticator implements Authenticator<Userna
 	private UserService userService;
 
 	@Inject
-	private MessageDigestPasswordEncoder passwordEncoder; 
+	private MessageDigestPasswordEncoder passwordEncoder;
 
 	@Override
-	public void validate(final UsernamePasswordCredentials credentials, final WebContext context)
-			 {
+	public void validate(final UsernamePasswordCredentials credentials, final WebContext context) {
 		if (credentials == null) {
 			throw new CredentialsException("No credential");
 		}
@@ -46,18 +45,16 @@ public class SimpleUsernamePasswordAuthenticator implements Authenticator<Userna
 		User user = null;
 		try {
 			user = userService.getUserByEmailOrMobile(username);
-		} catch(NotFoundException e ) {
+		} catch (NotFoundException e) {
 			log.error("No user with email {}", username);
 		}
 		if (user == null) {
 			throw new CredentialsException("Not a valid user");
 		} else if (user.getIsDeleted().booleanValue()) {
 			throw new CredentialsException("User deleted");
-		}
-		else if (!passwordEncoder.isPasswordValid(user.getPassword(), password, null)) {
+		} else if (!passwordEncoder.isPasswordValid(user.getPassword(), password, null)) {
 			throw new CredentialsException("Password is not valid");
-		} 
-		else {
+		} else {
 			CommonProfile profile = AuthUtility.createUserProfile(user);
 			log.debug("Setting profile in the context: {}", profile);
 			credentials.setUserProfile(profile);

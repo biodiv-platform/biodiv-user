@@ -30,7 +30,7 @@ public class DownloadLogData {
 	 * @param status
 	 * @param fileType
 	 */
-	public DownloadLogData(String filePath, String filterUrl, String status, String notes,String fileType) {
+	public DownloadLogData(String filePath, String filterUrl, String status, String notes, String fileType) {
 		super();
 		this.filePath = filePath;
 		this.filterUrl = filterUrl;

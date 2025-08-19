@@ -8,9 +8,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-
 import org.joda.time.DateTime;
 import org.joda.time.Hours;
 import org.pac4j.core.context.Pac4jConstants;
@@ -52,6 +49,8 @@ import com.strandls.user.util.PropertyFileUtil;
 import com.strandls.user.util.SimpleUsernamePasswordAuthenticator;
 import com.strandls.user.util.ValidationUtil;
 
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import net.minidev.json.JSONArray;
 
 public class AuthenticationServiceImpl implements AuthenticationService {

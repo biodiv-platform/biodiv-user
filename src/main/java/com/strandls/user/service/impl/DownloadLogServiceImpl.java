@@ -7,9 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-
 import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +14,16 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.strandls.authentication_utility.util.AuthUtil;
-import com.strandls.user.pojo.DownloadLog;
 import com.strandls.user.dao.DownloadLogDao;
+import com.strandls.user.pojo.DownloadLog;
 import com.strandls.user.pojo.DownloadLogData;
 import com.strandls.user.pojo.DownloadLogListMapping;
 import com.strandls.user.pojo.DownloadLogMapping;
 import com.strandls.user.pojo.UserIbp;
 import com.strandls.user.service.DowloadLogService;
+
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class DownloadLogServiceImpl implements DowloadLogService {
 	private final Logger logger = LoggerFactory.getLogger(DownloadLogServiceImpl.class);
@@ -96,8 +96,9 @@ public class DownloadLogServiceImpl implements DowloadLogService {
 		Long authorId = Long.parseLong(profile.getId());
 
 		DownloadLog downloadLog = new DownloadLog(null, 0L, authorId, new Date(), downloadLogData.getFilePath(),
-				downloadLogData.getFilterUrl(), downloadLogData.getNotes(), null, downloadLogData.getStatus().toLowerCase(),
-				downloadLogData.getFileType().toUpperCase(), downloadLogData.getSourcetype(), 0L);
+				downloadLogData.getFilterUrl(), downloadLogData.getNotes(), null,
+				downloadLogData.getStatus().toLowerCase(), downloadLogData.getFileType().toUpperCase(),
+				downloadLogData.getSourcetype(), 0L);
 
 		downloadLog = downloadLogDao.save(downloadLog);
 		return downloadLog.getId() != null ? true : false;

@@ -1,10 +1,10 @@
 package com.strandls.user.service.impl;
 
-import javax.inject.Inject;
-
 import com.strandls.user.dao.LanguageDao;
 import com.strandls.user.pojo.Language;
 import com.strandls.user.service.LanguageService;
+
+import jakarta.inject.Inject;
 
 public class LanguageServiceImpl implements LanguageService {
 
@@ -19,7 +19,7 @@ public class LanguageServiceImpl implements LanguageService {
 		}
 		return lang;
 	}
-	
+
 	private Language getCurrentLanguage() {
 		return languageDao.findLangByProperty("name", Language.DEFAULT_LANGUAGE);
 	}

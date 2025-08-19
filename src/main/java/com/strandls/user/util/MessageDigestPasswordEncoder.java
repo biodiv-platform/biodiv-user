@@ -4,12 +4,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.codec.Utf8;
+
+import jakarta.inject.Inject;
 
 public class MessageDigestPasswordEncoder {
 	private static final Logger logger = LoggerFactory.getLogger(MessageDigestPasswordEncoder.class);
@@ -73,7 +73,7 @@ public class MessageDigestPasswordEncoder {
 	 * @param rawPass The plain text password
 	 * @param salt    The salt to sprinkle
 	 * @return Hex string of password digest (or base64 encoded string if
-	 * 
+	 *
 	 *         encodeHashAsBase64 is enabled.
 	 */
 	public String encodePassword(String rawPass, Object salt) {
@@ -223,7 +223,7 @@ public class MessageDigestPasswordEncoder {
 
 	/**
 	 * Constant time comparison to prevent against timing attacks.
-	 * 
+	 *
 	 * @param expected dummy
 	 * @param actual   dummy
 	 * @return dummy

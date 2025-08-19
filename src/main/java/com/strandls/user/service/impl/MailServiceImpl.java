@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +21,9 @@ import com.strandls.user.pojo.User;
 import com.strandls.user.service.MailService;
 import com.strandls.user.util.AppUtil;
 import com.strandls.user.util.PropertyFileUtil;
+
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class MailServiceImpl implements MailService {
 

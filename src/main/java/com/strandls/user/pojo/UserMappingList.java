@@ -19,7 +19,7 @@ public class UserMappingList {
 	 * @param taxonomy
 	 * @param locationInformation
 	 */
-	public UserMappingList(Long id, User user,  List<UserUgRoleMapping> userGroup, List<UserTaxonRoleMapping> taxonomy,
+	public UserMappingList(Long id, User user, List<UserUgRoleMapping> userGroup, List<UserTaxonRoleMapping> taxonomy,
 			UserLocationInfo locationInformation) {
 		super();
 		this.id = id;

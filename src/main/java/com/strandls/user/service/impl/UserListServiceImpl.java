@@ -11,9 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +30,9 @@ import com.strandls.user.pojo.MapAggregationResponse;
 import com.strandls.user.pojo.UserListData;
 import com.strandls.user.pojo.UserMappingList;
 import com.strandls.user.service.UserListService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.HttpHeaders;
 
 public class UserListServiceImpl implements UserListService {
 	private final Logger logger = LoggerFactory.getLogger(UserListServiceImpl.class);

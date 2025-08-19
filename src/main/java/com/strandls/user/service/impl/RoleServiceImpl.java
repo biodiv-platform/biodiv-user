@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import com.strandls.user.dao.RoleDao;
 import com.strandls.user.pojo.Role;
 import com.strandls.user.service.RoleService;
+
+import jakarta.inject.Inject;
 
 public class RoleServiceImpl implements RoleService {
 

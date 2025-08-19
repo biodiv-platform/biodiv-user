@@ -13,9 +13,10 @@ import com.strandls.user.pojo.User;
 import com.strandls.user.pojo.UserIbp;
 
 public class UserConverter {
-	
-	private UserConverter() {}
-	
+
+	private UserConverter() {
+	}
+
 	public static UserDTO convertToDTO(User user) {
 		UserDTO dto = new UserDTO();
 		dto.setId(user.getId());
@@ -23,7 +24,7 @@ public class UserConverter {
 		dto.setMobileNumber(user.getMobileNumber());
 		return dto;
 	}
-	
+
 	public static UserIbp convertToIbp(User user) {
 		UserIbp ibp = new UserIbp();
 		ibp.setId(user.getId());
@@ -31,23 +32,23 @@ public class UserConverter {
 		ibp.setProfilePic(user.getProfilePic());
 		return ibp;
 	}
-	
+
 	public static Set<UserIbp> convertToIbpSet(List<User> users) {
 		Set<UserIbp> ibpList = new HashSet<UserIbp>();
-		for (User user: users) {
+		for (User user : users) {
 			ibpList.add(convertToIbp(user));
 		}
 		return ibpList;
 	}
-	
+
 	public static List<UserIbp> convertToIbpList(List<User> users) {
 		List<UserIbp> ibpList = new ArrayList<UserIbp>();
-		for (User user: users) {
+		for (User user : users) {
 			ibpList.add(convertToIbp(user));
 		}
 		return ibpList;
 	}
-	
+
 	public static Recipients convertToRecipient(User user) {
 		Recipients recipients = new Recipients();
 		recipients.setId(user.getId());
@@ -62,10 +63,10 @@ public class UserConverter {
 		recipients.setTokens(tokens);
 		return recipients;
 	}
-	
+
 	public static List<Recipients> convertToRecipientList(List<User> users) {
 		List<Recipients> recipientList = new ArrayList<>();
-		for (User user: users) {
+		for (User user : users) {
 			recipientList.add(convertToRecipient(user));
 		}
 		return recipientList;

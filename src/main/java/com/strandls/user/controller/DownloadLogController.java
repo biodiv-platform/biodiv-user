@@ -1,35 +1,37 @@
 package com.strandls.user.controller;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.strandls.authentication_utility.filter.ValidateUser;
-import com.strandls.user.pojo.DownloadLogData;
 import com.strandls.user.ApiConstants;
+import com.strandls.user.pojo.DownloadLogData;
 import com.strandls.user.pojo.DownloadLogListMapping;
 import com.strandls.user.service.DowloadLogService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+// --- OpenAPI 3 (Swagger for jakarta) ---
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
-@Api("User Service")
+@Tag(name = "User Service")
 @Path(ApiConstants.V1 + ApiConstants.DOWNLOADLOG)
 public class DownloadLogController {
 
@@ -40,12 +42,11 @@ public class DownloadLogController {
 
 	@GET
 	@Path(ApiConstants.LIST)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "Fetch the Download Log list", notes = "Returns the Download Log  list", response = DownloadLogListMapping.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the data", response = String.class) })
-
+	@Operation(summary = "Fetch the Download Log list", description = "Returns the Download Log  list")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successfully fetched data", content = @Content(schema = @Schema(implementation = DownloadLogListMapping.class))),
+			@ApiResponse(responseCode = "400", description = "Unable to fetch the data", content = @Content(schema = @Schema(type = "string"))) })
 	public Response observationList(@DefaultValue("createdOn") @QueryParam("sort") String sortOn,
 			@DefaultValue("0") @QueryParam("offset") String Offset,
 			@DefaultValue("10") @QueryParam("limit") String Limit, @QueryParam("sourceType") String sourceType) {
@@ -53,27 +54,26 @@ public class DownloadLogController {
 		try {
 			Integer offset = Integer.parseInt(Offset);
 			Integer limit = Integer.parseInt(Limit);
-			DownloadLogListMapping result = downloadLogService.getDownloadLogList(sourceType,sortOn, limit, offset);
+			DownloadLogListMapping result = downloadLogService.getDownloadLogList(sourceType, sortOn, limit, offset);
 			return Response.status(Status.OK).entity(result).build();
-
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
-
 	}
 
 	@POST
 	@Path(ApiConstants.CREATE)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-
 	@ValidateUser
-
-	@ApiOperation(value = "log the download", notes = "return true incase of logging", response = String.class)
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to log the download", response = String.class) })
+	@Operation(summary = "Log the download", description = "Return a message indicating status of logging")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Download logged", content = @Content(schema = @Schema(type = "string", example = "Download logged"))),
+			@ApiResponse(responseCode = "406", description = "Unable to log the download", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "400", description = "Unable to log the download", content = @Content(schema = @Schema(type = "string"))) })
 	public Response logDocumentDownload(@Context HttpServletRequest request,
-			@ApiParam("documentDownloadData") DownloadLogData downloadLogData) {
+			@RequestBody(required = true, description = "The download log data to create", content = @Content(schema = @Schema(implementation = DownloadLogData.class))) DownloadLogData downloadLogData) {
 		try {
 			Boolean result = downloadLogService.createDownloadLog(request, downloadLogData);
 
@@ -85,5 +85,4 @@ public class DownloadLogController {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
-
 }

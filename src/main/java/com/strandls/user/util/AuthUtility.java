@@ -10,8 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.json.JSONObject;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.profile.CommonProfile;
@@ -28,6 +26,7 @@ import com.strandls.authentication_utility.util.PropertyFileUtil;
 import com.strandls.user.pojo.Role;
 import com.strandls.user.pojo.User;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.minidev.json.JSONArray;
 
 public class AuthUtility {
@@ -118,7 +117,7 @@ public class AuthUtility {
 
 	public static String getUserEmail(String token) {
 		CommonProfile profile = AuthUtil.getProfileFromToken(token);
-		return profile != null && profile.getEmail() != null  ? profile.getEmail() : null;
+		return profile != null && profile.getEmail() != null ? profile.getEmail() : null;
 	}
 
 	public static String[] getDefaultRoles() {

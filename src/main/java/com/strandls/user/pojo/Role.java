@@ -3,25 +3,22 @@ package com.strandls.user.pojo;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+// Modern Swagger (OpenAPI 3.x)
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "role")
 @JsonIgnoreProperties(ignoreUnknown = true, value = { "users" })
-@ApiModel(value = "Role")
+@Schema(name = "Role")
 public class Role implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6401648706578439017L;
 
 	@Id
@@ -58,5 +55,4 @@ public class Role implements Serializable {
 	public void setUsers(Set<User> users) {
 		this.users = users;
 	}
-
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.strandls.user.service.impl;
 
@@ -14,9 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
@@ -53,6 +50,8 @@ import com.strandls.user.service.UserService;
 import com.strandls.user.util.AuthUtility;
 import com.strandls.user.util.NotificationScheduler;
 
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import net.minidev.json.JSONArray;
 
 /**

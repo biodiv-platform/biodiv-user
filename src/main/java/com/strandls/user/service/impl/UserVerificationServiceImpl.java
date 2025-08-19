@@ -3,11 +3,11 @@ package com.strandls.user.service.impl;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import com.strandls.user.dao.UserVerificationDao;
 import com.strandls.user.pojo.UserVerification;
 import com.strandls.user.service.UserVerificationService;
+
+import jakarta.inject.Inject;
 
 public class UserVerificationServiceImpl implements UserVerificationService {
 

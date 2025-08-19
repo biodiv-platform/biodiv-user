@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.strandls.user;
 
@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
-
-import javax.servlet.ServletContextEvent;
 
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.hibernate.SessionFactory;
@@ -49,6 +47,7 @@ import com.strandls.user.service.impl.UserServiceModule;
 import com.strandls.user.util.PropertyFileUtil;
 import com.strandls.user.util.SNSUtil;
 
+import jakarta.servlet.ServletContextEvent;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -85,7 +84,7 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				SessionFactory sessionFactory = configuration.buildSessionFactory();
 
 				Map<String, String> props = new HashMap<String, String>();
-				props.put("javax.ws.rs.Application", ApplicationConfig.class.getName());
+				props.put("jakarta.ws.rs.Application", ApplicationConfig.class.getName());
 				props.put("jersey.config.server.provider.packages", "com");
 				props.put("jersey.config.server.wadl.disableWadl", "true");
 
@@ -146,7 +145,7 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 			Annotation[] annotations = cls.getAnnotations();
 
 			for (Annotation annotation : annotations) {
-				if (annotation instanceof javax.persistence.Entity) {
+				if (annotation instanceof jakarta.persistence.Entity) {
 					logger.debug("Mapping entity : {}", cls.getCanonicalName());
 					classes.add(cls);
 				}
@@ -183,30 +182,34 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 
 	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
-
 		Injector injector = (Injector) servletContextEvent.getServletContext().getAttribute(Injector.class.getName());
 
-		SessionFactory sessionFactory = injector.getInstance(SessionFactory.class);
-		sessionFactory.close();
-		Channel channel = injector.getInstance(Channel.class);
-		try {
-			channel.getConnection().close();
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-		}
-		super.contextDestroyed(servletContextEvent);
-		// ... First close any background tasks which may be using the DB ...
-		// ... Then close any DB connection pools ...
+		if (injector != null) {
+			SessionFactory sessionFactory = injector.getInstance(SessionFactory.class);
+			if (sessionFactory != null) {
+				sessionFactory.close();
+			}
 
-		// Now deregister JDBC drivers in this context's ClassLoader:
-		// Get the webapp's ClassLoader
+			Channel channel = injector.getInstance(Channel.class);
+			if (channel != null) {
+				try {
+					channel.getConnection().close();
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+				}
+			}
+		} else {
+			logger.warn("Injector is null in contextDestroyed. Skipping shutdown routines.");
+		}
+
+		super.contextDestroyed(servletContextEvent);
+
+		// JDBC driver deregistration logic
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		// Loop through all drivers
 		Enumeration<Driver> drivers = DriverManager.getDrivers();
 		while (drivers.hasMoreElements()) {
 			Driver driver = drivers.nextElement();
 			if (driver.getClass().getClassLoader() == cl) {
-				// This driver was registered by the webapp's ClassLoader, so deregister it:
 				try {
 					logger.info("Deregistering JDBC driver {}", driver);
 					DriverManager.deregisterDriver(driver);
@@ -214,12 +217,9 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 					logger.error("Error deregistering JDBC driver {}", driver, ex);
 				}
 			} else {
-				// driver was not registered by the webapp's ClassLoader and may be in use
-				// elsewhere
 				logger.trace("Not deregistering JDBC driver {} as it does not belong to this webapp's ClassLoader",
 						driver);
 			}
 		}
-
 	}
 }

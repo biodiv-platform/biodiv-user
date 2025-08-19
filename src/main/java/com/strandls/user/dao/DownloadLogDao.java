@@ -6,11 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -19,6 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import com.strandls.user.pojo.DownloadLog;
 import com.strandls.user.util.AbstractDAO;
+
+// ---- Updated imports for Jakarta ----
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+// --------------------------------------
 
 public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 
@@ -53,9 +55,9 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<DownloadLog> cr = cb.createQuery(DownloadLog.class);
 		Root<DownloadLog> root = cr.from(DownloadLog.class);
-		if(sourceType!= null && !sourceType.isEmpty()) {
+		if (sourceType != null && !sourceType.isEmpty()) {
 			cr.select(root).where(cb.equal(root.get("sourceType"), sourceType)).orderBy(cb.desc(root.get(orderBy)));
-		}else {
+		} else {
 			cr.select(root).orderBy(cb.desc(root.get(orderBy)));
 		}
 
@@ -73,7 +75,7 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 		}
 		return downloadLogList;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Long getTotalDownloadLogs() {
 		Session session = sessionFactory.openSession();
@@ -100,11 +102,10 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 			Query<Object[]> query = session.createNativeQuery(qry);
 			query.getResultList().forEach(item -> {
 				Map<String, Long> res = new HashMap<String, Long>();
-				if(item[0] != null ) {
+				if (item[0] != null) {
 					res.put(item[0].toString(), Long.parseLong(item[1].toString()));
 					aggregationList.add(res);
 				}
-				
 			});
 			return aggregationList;
 		} catch (Exception e) {
@@ -114,5 +115,4 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 		}
 		return aggregationList;
 	}
-
 }

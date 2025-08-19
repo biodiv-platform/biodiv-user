@@ -1,26 +1,22 @@
-/**
- * 
- */
 package com.strandls.user.dao;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.CriteriaSpecification;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.type.LongType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.strandls.user.pojo.User;
 import com.strandls.user.util.AbstractDAO;
+
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * @author Abhishek Rudra
@@ -49,7 +45,6 @@ public class UserDao extends AbstractDAO<User, Long> {
 		} finally {
 			session.close();
 		}
-
 		return entity;
 	}
 
@@ -61,7 +56,6 @@ public class UserDao extends AbstractDAO<User, Long> {
 		try {
 			Query<User> query = session.createQuery(hql);
 			query.setParameter("email", email.toLowerCase());
-
 			entity = query.getSingleResult();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -79,7 +73,6 @@ public class UserDao extends AbstractDAO<User, Long> {
 		try {
 			Query<User> query = session.createQuery(hql);
 			query.setParameter("mobileNumber", mobileNumber);
-
 			entity = query.getSingleResult();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -97,7 +90,6 @@ public class UserDao extends AbstractDAO<User, Long> {
 		try {
 			Query<User> query = session.createQuery(hql);
 			query.setParameter("data", data);
-
 			entity = query.getSingleResult();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -107,17 +99,23 @@ public class UserDao extends AbstractDAO<User, Long> {
 		return entity;
 	}
 
-	@SuppressWarnings({ "deprecation", "unchecked" })
+	// ---- MODERN CRITERIA API VERSION ----
 	public List<User> findNames(String phrase) {
 		Session session = sessionFactory.openSession();
 		List<User> entity = new ArrayList<>();
 		try {
-			Criteria criteria = session.createCriteria(User.class);
-			criteria.add(Restrictions.eq("accountLocked", false));
-			criteria.add(Restrictions.like("name", phrase, MatchMode.ANYWHERE).ignoreCase());
-			criteria.setMaxResults(10);
-			criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-			entity.addAll(criteria.list());
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<User> cq = cb.createQuery(User.class);
+			Root<User> root = cq.from(User.class);
+
+			Predicate isNotLocked = cb.equal(root.get("accountLocked"), false);
+			Predicate likeName = cb.like(cb.lower(root.get("name")), "%" + phrase.toLowerCase() + "%");
+
+			cq.select(root).where(cb.and(isNotLocked, likeName)).distinct(true);
+			Query<User> query = session.createQuery(cq);
+			query.setMaxResults(10);
+
+			entity = query.getResultList();
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
 		} finally {
@@ -125,16 +123,16 @@ public class UserDao extends AbstractDAO<User, Long> {
 		}
 		return entity;
 	}
+	// -------------------------------------
 
 	@SuppressWarnings("unchecked")
 	public List<Long> findRoleAdmin() {
 		Session session = sessionFactory.openSession();
-		String qry = "SELECT s_user_id	FROM public.suser_role sr join role r on sr.role_id = r.id where r.authority = 'ROLE_ADMIN'";
+		String qry = "SELECT s_user_id  FROM public.suser_role sr join role r on sr.role_id = r.id where r.authority = 'ROLE_ADMIN'";
 		List<Long> result = null;
 		try {
-			Query<Long> query = session.createNativeQuery(qry).addScalar("s_user_id", LongType.INSTANCE);
+			Query<Long> query = session.createNativeQuery(qry, Long.class);
 			result = query.getResultList();
-
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		} finally {
@@ -142,5 +140,4 @@ public class UserDao extends AbstractDAO<User, Long> {
 		}
 		return result;
 	}
-
 }

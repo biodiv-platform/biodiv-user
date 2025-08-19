@@ -4,22 +4,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
-
 import org.json.JSONObject;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator;
@@ -27,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.strandls.authentication_utility.filter.ValidateUser;
-import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.user.ApiConstants;
 import com.strandls.user.Constants;
 import com.strandls.user.Constants.ERROR_CONSTANTS;
+import com.strandls.user.dto.StringObjectMap;
 import com.strandls.user.dto.UserDTO;
 import com.strandls.user.pojo.User;
 import com.strandls.user.pojo.requests.UserPasswordChange;
@@ -44,14 +28,31 @@ import com.strandls.user.util.GoogleRecaptchaCheck;
 import com.strandls.user.util.PropertyFileUtil;
 import com.strandls.user.util.ValidationUtil;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import net.minidev.json.JSONArray;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+// OpenAPI 3 for Jakarta
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
-@Api("Authentication Service")
+@Tag(name = "Authentication Service")
 @Path(ApiConstants.V1 + ApiConstants.AUTHENTICATE)
 public class AuthenticationController {
 
@@ -59,20 +60,18 @@ public class AuthenticationController {
 
 	@Inject
 	private JwtAuthenticator jwtAuthenticator;
-
 	@Inject
 	private AuthenticationService authenticationService;
-
 	@Inject
 	private UserService userService;
-
 	@Inject
 	private RoleService roleService;
 
 	@GET
 	@Path(ApiConstants.PING)
 	@Produces(MediaType.TEXT_PLAIN)
-	@ApiOperation(value = "Ping", notes = "Pong", response = String.class)
+	@Operation(summary = "Ping", description = "Pong")
+	@ApiResponse(responseCode = "200", description = "Simple ping test", content = @Content(schema = @Schema(type = "string", example = "Pong")))
 	public Response getTestResponse() {
 		return Response.status(Status.OK).entity("Pong").build();
 	}
@@ -81,11 +80,14 @@ public class AuthenticationController {
 	@Path(ApiConstants.LOGIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@ApiOperation(value = "Authenticates User by Credentials", notes = "Returns Tokens", response = Map.class)
+	@Operation(summary = "Authenticates User by Credentials", description = "Returns Tokens")
 	@ApiResponses(value = {
-			@ApiResponse(code = 403, message = "Could not authenticate user", response = String.class) })
+			@ApiResponse(responseCode = "200", description = "Tokens returned", content = @Content(schema = @Schema(implementation = StringObjectMap.class))),
+			@ApiResponse(responseCode = "403", description = "Could not authenticate user", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(type = "string"))) })
 	public Response authenticate(@Context HttpServletRequest request, @FormParam("username") String userEmail,
 			@FormParam("password") String password, @FormParam("mode") String mode) {
+
 		try {
 			if (userEmail == null || userEmail.isEmpty()) {
 				return Response.status(Status.BAD_REQUEST)
@@ -126,14 +128,14 @@ public class AuthenticationController {
 			}
 			boolean status = Boolean.parseBoolean(tokens.get(Constants.STATUS).toString());
 			boolean verification = Boolean.parseBoolean(tokens.get("verificationRequired").toString());
-			ResponseBuilder response = Response.ok().entity(tokens);
+			ResponseBuilder response = Response.ok().entity(new StringObjectMap<Object>(tokens));
 			String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
 			if (status && !verification && noCookie.equals("0")) {
 				NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, tokens.get(Constants.ACCESS_TOKEN).toString(),
-						"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);// NOSONAR
+						"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);
 				NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN,
 						tokens.get(Constants.REFRESH_TOKEN).toString(), "/", AppUtil.getDomain(request), "",
-						10 * 24 * 60 * 60, false);// NOSONAR
+						10 * 24 * 60 * 60, false);
 				return response.cookie(accessToken).cookie(refreshToken).build();
 			} else {
 				return response.build();
@@ -148,17 +150,19 @@ public class AuthenticationController {
 	@Path(ApiConstants.REFRESH_TOKENS)
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@ApiOperation(value = "Generates new set of tokens based on the refresh token", notes = "Returns New Set of Tokens", response = Map.class)
-	@ApiResponses(value = { @ApiResponse(code = 403, message = "Invalid refresh token", response = String.class) })
+	@Operation(summary = "Generates new set of tokens based on the refresh token", description = "Returns New Set of Tokens")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "New tokens returned", content = @Content(schema = @Schema(implementation = Map.class))),
+			@ApiResponse(responseCode = "403", description = "Invalid refresh token", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(type = "string"))) })
 	public Response generateNewTokens(@QueryParam("refreshToken") String refreshToken) {
+
 		CommonProfile profile = jwtAuthenticator.validateToken(refreshToken);
 		if (profile == null) {
 			logger.debug("Invalid response token");
 			return Response.status(Response.Status.BAD_REQUEST).entity("Invalid refresh token").build();
 		}
 		try {
-			// Retrieve the claims from JWT and call the buildTokens method to generate the
-			// tokens
 			Map<String, Object> tokens = this.authenticationService.buildTokens(profile,
 					this.userService.fetchUser(Long.parseLong(profile.getId())), true);
 
@@ -180,10 +184,14 @@ public class AuthenticationController {
 	@Path(ApiConstants.VALIDATE_TOKEN)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Validates access token", notes = "Returns if token is valid or not", response = Boolean.class)
-	@ApiResponses(value = { @ApiResponse(code = 401, message = "Unauthorized access token", response = String.class),
-			@ApiResponse(code = 406, message = "Invalid access token", response = String.class) })
+	@Operation(summary = "Validates access token", description = "Returns if token is valid or not")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Valid access token", content = @Content(schema = @Schema(type = "string", example = "true"))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized access token", content = @Content(schema = @Schema(type = "string", example = "false"))),
+			@ApiResponse(responseCode = "406", description = "Invalid access token", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(type = "string"))) })
 	public Response validateToken(@QueryParam("accessToken") String accessToken) {
+
 		if (accessToken == null || accessToken.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -202,8 +210,13 @@ public class AuthenticationController {
 	@Path(ApiConstants.SIGNUP)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Create new user", notes = "Returns the created user", response = Map.class)
-	public Response signUp(@Context HttpServletRequest request, @ApiParam(name = "userDTO") UserDTO userDTO) {
+	@Operation(summary = "Create new user", description = "Returns the created user")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "User created", content = @Content(schema = @Schema(implementation = StringObjectMap.class))),
+			@ApiResponse(responseCode = "400", description = "Invalid input or other error", content = @Content(schema = @Schema(type = "string"))) })
+	public Response signUp(@Context HttpServletRequest request,
+			@RequestBody(description = "User data", required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))) UserDTO userDTO) {
+
 		try {
 			String username = userDTO.getUsername();
 			String password = userDTO.getPassword();
@@ -222,7 +235,6 @@ public class AuthenticationController {
 				return Response.status(Status.BAD_REQUEST)
 						.entity(AppUtil.generateResponse(false, ERROR_CONSTANTS.INVALID_CAPTCHA)).build();
 			}
-
 			if (username == null || username.isEmpty()) {
 				return Response.status(Status.BAD_REQUEST).entity("Username cannot be empty").build();
 			}
@@ -263,7 +275,7 @@ public class AuthenticationController {
 				return Response.status(Status.BAD_REQUEST).entity("Invalid mobile number").build();
 			}
 			Map<String, Object> data = authenticationService.addUser(request, userDTO, verificationType);
-			return Response.status(Status.OK).entity(data).build();
+			return Response.status(Status.OK).entity(new StringObjectMap<Object>(data)).build();
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
 			return Response.status(Status.BAD_REQUEST).entity("Could not create user").build();
@@ -274,9 +286,13 @@ public class AuthenticationController {
 	@Path(ApiConstants.VALIDATE)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Validates the OTP for user", notes = "Returns tokens if the OTP is valid", response = Map.class)
+	@Operation(summary = "Validates the OTP for user", description = "Returns tokens if the OTP is valid")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Result of OTP validation", content = @Content(schema = @Schema(implementation = StringObjectMap.class))),
+			@ApiResponse(responseCode = "400", description = "Missing ID or OTP", content = @Content(schema = @Schema(type = "string"))) })
 	public Response validateAccount(@Context HttpServletRequest request, @FormParam("id") Long id,
 			@FormParam("otp") String otp) {
+
 		if (id == null) {
 			return Response.status(Status.BAD_REQUEST).entity("ID Cannot be empty").build();
 		}
@@ -287,19 +303,24 @@ public class AuthenticationController {
 		String noCookie = PropertyFileUtil.fetchProperty("config.properties", Constants.NO_COOKIE);
 		if (Boolean.parseBoolean(result.get(Constants.STATUS).toString()) && noCookie.equals("0")) {
 			NewCookie accessToken = new NewCookie(Constants.BA_TOKEN, result.get(Constants.ACCESS_TOKEN).toString(),
-					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);// NOSONAR
+					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);
 			NewCookie refreshToken = new NewCookie(Constants.BR_TOKEN, result.get(Constants.REFRESH_TOKEN).toString(),
-					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);// NOSONAR
-			return Response.ok().entity(result).cookie(accessToken).cookie(refreshToken).build();
+					"/", AppUtil.getDomain(request), "", 10 * 24 * 60 * 60, false);
+			return Response.ok().entity(new StringObjectMap<Object>(result)).cookie(accessToken).cookie(refreshToken)
+					.build();
 		}
-		return Response.status(Status.OK).entity(result).build();
+		return Response.ok().entity(new StringObjectMap<Object>(result)).build();
 	}
 
 	@GET
 	@Path(ApiConstants.VERIFICATION_CONFIG)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Get verification config", description = "Returns verification config as string array")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Config values", content = @Content(array = @io.swagger.v3.oas.annotations.media.ArraySchema(schema = @Schema(type = "string")))) })
 	public Response getVerificationConfig() {
+
 		return Response.status(Status.OK)
 				.entity(PropertyFileUtil.fetchProperty("config.properties", "verification_config").split(",")).build();
 	}
@@ -308,9 +329,12 @@ public class AuthenticationController {
 	@Path(ApiConstants.REGENERATE_OTP)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Regenerates OTP", notes = "Returns the status of the request", response = Map.class)
+	@Operation(summary = "Regenerates OTP", description = "Returns the status of the request")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "OTP regeneration status", content = @Content(schema = @Schema(implementation = Map.class))) })
 	public Response regenerateOTP(@Context HttpServletRequest request, @FormParam("id") Long id,
 			@FormParam("action") Integer action) {
+
 		Map<String, Object> data = authenticationService.regenerateOTP(request, id, action);
 		return Response.status(Status.OK).entity(data).build();
 	}
@@ -319,9 +343,13 @@ public class AuthenticationController {
 	@Path(ApiConstants.FORGOT_PASSWORD)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Forgot Password - Send Mail/SMS", notes = "Returns the status", response = Map.class)
+	@Operation(summary = "Forgot Password - Send Mail/SMS", description = "Returns the status")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Status object", content = @Content(schema = @Schema(implementation = Map.class))),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(type = "string"))) })
 	public Response forgotPassword(@Context HttpServletRequest request,
 			@FormParam("verificationId") String verificationId) {
+
 		Map<String, Object> data = authenticationService.forgotPassword(request, verificationId);
 		if (data != null)
 			return Response.status(Status.OK).entity(data).build();
@@ -332,10 +360,15 @@ public class AuthenticationController {
 	@Path(ApiConstants.RESET_PASSWORD)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Password Reset", notes = "Returns the status", response = Map.class)
+	@Operation(summary = "Password Reset", description = "Returns the status")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Password reset status", content = @Content(schema = @Schema(implementation = Map.class))),
+			@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(type = "string"))) })
 	public Response resetPassword(@Context HttpServletRequest request, @FormParam("id") Long id,
 			@FormParam("otp") String otp, @FormParam("password") String password,
 			@FormParam("confirmPassword") String confirmPassword) {
+
 		if (password == null || password.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("Password cannot be empty").build();
 		}
@@ -353,12 +386,13 @@ public class AuthenticationController {
 	@Path(ApiConstants.CHANGE_PASSWORD)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-
 	@ValidateUser
-
-	@ApiOperation(value = "Password Change", notes = "Returns the status", response = Map.class)
+	@Operation(summary = "Password Change", description = "Returns the status")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Password change status", content = @Content(schema = @Schema(implementation = Map.class))),
+			@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(type = "string"))) })
 	public Response changePassword(@Context HttpServletRequest request,
-			@ApiParam(name = "user") UserPasswordChange inputUser) {
+			@RequestBody(description = "Password change request", required = true, content = @Content(schema = @Schema(implementation = UserPasswordChange.class))) UserPasswordChange inputUser) {
 
 		if (inputUser.getNewPassword() == null || inputUser.getNewPassword().isEmpty()
 				|| inputUser.getConfirmNewPassword() == null) {
@@ -369,7 +403,6 @@ public class AuthenticationController {
 				return Response.status(Status.BAD_REQUEST).entity("Passwords do not match").build();
 			}
 		}
-
 		Map<String, Object> data = authenticationService.changePassword(request, inputUser);
 		return Response.status(Status.OK).entity(data).build();
 	}

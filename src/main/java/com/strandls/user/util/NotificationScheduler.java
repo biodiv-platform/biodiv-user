@@ -20,7 +20,6 @@ public class NotificationScheduler extends Thread {
 
 	private static final Logger logger = LoggerFactory.getLogger(NotificationScheduler.class);
 
-
 	Channel channel;
 	FirebaseDTO firebaseDTO;
 	List<FirebaseTokens> tokens;
