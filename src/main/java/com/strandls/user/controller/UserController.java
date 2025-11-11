@@ -160,7 +160,7 @@ public class UserController {
 			@ApiResponse(responseCode = "200", description = "List of users.", content = @Content(array = @ArraySchema(schema = @Schema(implementation = User.class)))),
 			@ApiResponse(responseCode = "400", description = "Bad request") })
 	public Response getUserBulk(
-			@RequestBody(description = "userIds", required = true, content = @Content(array = @ArraySchema(schema = @Schema(type = "integer")))) List<Long> userIdList) {
+			@RequestBody(description = "userIds", required = true, content = @Content(array = @ArraySchema(schema = @Schema(type = "long")))) List<Long> userIdList) {
 		try {
 			List<User> users = userService.fetchUserBulk(userIdList);
 			return Response.status(Status.OK).entity(users).build();
