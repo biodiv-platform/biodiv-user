@@ -157,6 +157,11 @@ public class AuthenticationController {
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(type = "string"))) })
 	public Response generateNewTokens(@QueryParam("refreshToken") String refreshToken) {
 
+		if (refreshToken == null || refreshToken.trim().isEmpty()) {
+			logger.debug("Refresh token is null or empty");
+			return Response.status(Response.Status.BAD_REQUEST).entity("Refresh token is required").build();
+		}
+
 		CommonProfile profile = jwtAuthenticator.validateToken(refreshToken);
 		if (profile == null) {
 			logger.debug("Invalid response token");
