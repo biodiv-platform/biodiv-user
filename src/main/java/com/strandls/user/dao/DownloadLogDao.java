@@ -82,8 +82,8 @@ public class DownloadLogDao extends AbstractDAO<DownloadLog, Long> {
 		String qry = "select count(id) from download_log where  status != 'Failed'";
 		Long total = null;
 		try {
-			Query<BigInteger> query = session.createNativeQuery(qry);
-			total = query.getSingleResult().longValue();
+			Query<Long> query = session.createNativeQuery(qry);
+			total = query.getSingleResult();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		} finally {
