@@ -8,6 +8,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rabbitmq.client.Channel;
 import com.strandls.mail_utility.model.EnumModel.FIELDS;
 import com.strandls.mail_utility.model.EnumModel.INFO_FIELDS;
 import com.strandls.mail_utility.model.EnumModel.MAIL_TYPE;
@@ -16,6 +17,7 @@ import com.strandls.mail_utility.model.EnumModel.USER_REGISTRATION;
 import com.strandls.mail_utility.model.EnumModel.WELCOME_MAIL;
 import com.strandls.mail_utility.producer.RabbitMQProducer;
 import com.strandls.mail_utility.util.JsonUtil;
+import com.strandls.user.RabbitChannelProvider;
 import com.strandls.user.RabbitMqConnection;
 import com.strandls.user.pojo.User;
 import com.strandls.user.service.MailService;
@@ -30,7 +32,7 @@ public class MailServiceImpl implements MailService {
 	private static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
 
 	@Inject
-	private RabbitMQProducer mailProducer;
+	private RabbitChannelProvider channelProvider;
 
 	@Override
 	public void sendActivationMail(HttpServletRequest request, User user, String otp) {
@@ -47,7 +49,9 @@ public class MailServiceImpl implements MailService {
 		mailData.put(INFO_FIELDS.TYPE.getAction(), MAIL_TYPE.USER_REGISTRATION.getAction());
 		mailData.put(INFO_FIELDS.RECIPIENTS.getAction(), Arrays.asList(data));
 		try {
-			mailProducer.produceMail(RabbitMqConnection.EXCHANGE, RabbitMqConnection.ROUTING_KEY, null,
+			Channel channel = channelProvider.get();
+			RabbitMQProducer producer = new RabbitMQProducer(channel);
+			producer.produceMail(RabbitMqConnection.EXCHANGE, RabbitMqConnection.ROUTING_KEY, null,
 					JsonUtil.mapToJSON(mailData));
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -78,7 +82,9 @@ public class MailServiceImpl implements MailService {
 		mailData.put(INFO_FIELDS.TYPE.getAction(), MAIL_TYPE.WELCOME_MAIL.getAction());
 		mailData.put(INFO_FIELDS.RECIPIENTS.getAction(), Arrays.asList(data));
 		try {
-			mailProducer.produceMail(RabbitMqConnection.EXCHANGE, RabbitMqConnection.ROUTING_KEY, null,
+			Channel channel = channelProvider.get();
+			RabbitMQProducer producer = new RabbitMQProducer(channel);
+			producer.produceMail(RabbitMqConnection.EXCHANGE, RabbitMqConnection.ROUTING_KEY, null,
 					JsonUtil.mapToJSON(mailData));
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
@@ -100,7 +106,9 @@ public class MailServiceImpl implements MailService {
 		mailData.put(INFO_FIELDS.TYPE.getAction(), MAIL_TYPE.RESET_PASSWORD.getAction());
 		mailData.put(INFO_FIELDS.RECIPIENTS.getAction(), Arrays.asList(data));
 		try {
-			mailProducer.produceMail(RabbitMqConnection.EXCHANGE, RabbitMqConnection.ROUTING_KEY, null,
+			Channel channel = channelProvider.get();
+			RabbitMQProducer producer = new RabbitMQProducer(channel);
+			producer.produceMail(RabbitMqConnection.EXCHANGE, RabbitMqConnection.ROUTING_KEY, null,
 					JsonUtil.mapToJSON(mailData));
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());

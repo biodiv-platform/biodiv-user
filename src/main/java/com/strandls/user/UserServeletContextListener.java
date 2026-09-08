@@ -37,9 +37,9 @@ import com.google.inject.Injector;
 import com.google.inject.Scopes;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
-import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Connection;
 import com.strandls.esmodule.controllers.EsServicesApi;
-import com.strandls.mail_utility.producer.RabbitMQProducer;
 import com.strandls.user.controller.UserControllerModule;
 import com.strandls.user.dao.UserDaoModule;
 import com.strandls.user.es.utils.EsUtilModule;
@@ -88,22 +88,22 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				props.put("jersey.config.server.provider.packages", "com");
 				props.put("jersey.config.server.wadl.disableWadl", "true");
 
-				RabbitMqConnection connection = new RabbitMqConnection();
-				Channel channel = null;
+//				Rabbit MQ initialisation: one long-lived Connection for the app;
+//				channels are handed out per-thread via RabbitChannelProvider instead
+//				of a single Channel being shared/injected everywhere.
+				RabbitMqConnection rabbitMqConnection = new RabbitMqConnection();
+				Connection rabbitConnection = null;
 				try {
-					channel = connection.setRabbitMQConnetion();
+					rabbitConnection = rabbitMqConnection.connect();
 				} catch (Exception e) {
-					logger.error(e.getMessage());
+					logger.error("Failed to establish RabbitMQ connection", e);
 				}
 
-				bind(Channel.class).toInstance(channel);
+				bind(Connection.class).toInstance(rabbitConnection);
+				bind(RabbitChannelProvider.class).in(Scopes.SINGLETON);
 
 				ObjectMapper om = new ObjectMapper();
 				bind(ObjectMapper.class).toInstance(om);
-
-//				mail producer binded
-				RabbitMQProducer mailProducer = new RabbitMQProducer(channel);
-				bind(RabbitMQProducer.class).toInstance(mailProducer);
 
 //				SNS CLIENT
 				Properties prop = PropertyFileUtil.fetchProperty("config.properties");
@@ -190,13 +190,15 @@ public class UserServeletContextListener extends GuiceServletContextListener {
 				sessionFactory.close();
 			}
 
-			Channel channel = injector.getInstance(Channel.class);
-			if (channel != null) {
-				try {
-					channel.getConnection().close();
-				} catch (IOException e) {
-					logger.error(e.getMessage());
-				}
+			Connection rabbitConnection = injector.getInstance(Connection.class);
+			if (rabbitConnection != null) {
+				// abort() (unlike close()) forces the connection down immediately and
+				// cancels any in-flight/scheduled automatic-recovery attempt, and never
+				// throws. A graceful close() was observed leaving the client's own
+				// background recovery thread alive past contextDestroyed(), which then
+				// crashed trying to use this webapp's classloader after Tomcat had
+				// already stopped it (surfacing as a redeploy/reload memory leak).
+				rabbitConnection.abort(AMQP.REPLY_SUCCESS, "context destroyed", 5000);
 			}
 		} else {
 			logger.warn("Injector is null in contextDestroyed. Skipping shutdown routines.");
