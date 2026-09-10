@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
 import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.esmodule.ApiException;
 import com.strandls.esmodule.controllers.EsServicesApi;
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 	private EsServicesApi esService;
 
 	@Inject
-	private Channel channel;
+	private Connection connection;
 
 	@Inject
 	private ObjectMapper om;
@@ -382,7 +382,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void sendPushNotifications(FirebaseDTO firebaseDTO) {
 		List<FirebaseTokens> tokens = firebaseDao.findAll();
-		NotificationScheduler scheduler = new NotificationScheduler(channel, firebaseDTO, tokens);
+		NotificationScheduler scheduler = new NotificationScheduler(connection, firebaseDTO, tokens);
 		scheduler.start();
 	}
 
