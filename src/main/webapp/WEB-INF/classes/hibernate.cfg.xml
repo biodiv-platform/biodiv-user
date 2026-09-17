@@ -19,6 +19,10 @@
 		<property name="hibernate.hikari.validationTimeout">5000</property>
 		<property name="hibernate.hikari.connectionTestQuery">SELECT 1</property>
 
+		<!-- Live pool metrics via JMX -->
+		<property name="hibernate.hikari.registerMbeans">true</property>
+		<property name="hibernate.hikari.poolName">user-pool</property>
+
 		<!-- Schema config -->
 		<property name="hibernate.hbm2ddl.auto">none</property>
 		<property name="hibernate.jdbc.lob.non_contextual_creation">true</property>
